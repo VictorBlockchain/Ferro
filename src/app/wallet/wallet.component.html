@@ -86,8 +86,11 @@
               </div>
               <div class="col-12 col-sm-8 col-lg-9">
                 <div class="author-data">
-                  <h3 class="mb-2 author-name text-white">{{_profile.name || 'incognito'}}<a class="btn btn-warning btn-sm rounded-pill align-top ms-2 px-3 py-1" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="me-1 bi bi-pen"></i> Edit</a></h3>
-                  <div class="btn btn-minimal d-inline-block mb-3 text-white hover-warning">{{_user || '0x...'}}</div>
+                  <h3 class="mb-2 author-name text-white">{{_profile.name || 'incognito'}}
+                    <a class="btn btn-warning btn-sm rounded-pill align-top ms-2 px-3 py-1" data-bs-toggle="modal" data-bs-target="#profileModal" *ngIf="!_profile.story"><i class="me-1 bi bi-pen"></i> Create</a>
+                    <a class="btn btn-warning btn-sm rounded-pill align-top ms-2 px-3 py-1" data-bs-toggle="modal" data-bs-target="#profileModal" *ngIf="_profile.story"><i class="me-1 bi bi-pen"></i> Edit</a>
+                  </h3>
+                  <div class="btn btn-minimal d-inline-block mb-3 text-white hover-warning">{{_user.slice(0,7) || '0x...'}}...</div>
                   <p class="w-75 mb-0">{{_profile.story || 'no story yet'}}</p>
                 </div>
               </div>
@@ -98,7 +101,6 @@
             <button class="dropdown-toggle" id="dd9887" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
             <!-- Dropdown Menu -->
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dd9887" style="">
-              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="me-1 bi bi-share"></i>Edit Profile</a></li>
               <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="me-1 bi bi-share"></i>Share</a></li>
               <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#copylinkModal"><i class="me-1 bi bi-box-arrow-up-right"></i>Copy Link</a></li>
               <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="me-1 bi bi-flag"></i>Report</a></li>
@@ -129,9 +131,10 @@
                                   <div class="col-12">
                                     <div class="card dashboard-hero-card p-2 border-0 bg-img shadow-sm" style="background-image: url('assets/img/bg-img/44.jpeg')">
                                       <div class="card-body p-4">
-                                        <h3 class="mb-3 text-white">FERRO (iron) Wallet</h3>
-                                        <p class="mb-4 text-white">A secure smart contract wallet for storing your digital assets</p>
-                                        <div class="button-groups"><a class="btn btn-sm btn-warning rounded-pill me-3" href="#">Add Wallet</a><a class="btn btn-sm btn-dark rounded-pill" href="#">Lock Wallet</a></div>
+                                        <h3 class="mb-3 text-white text-center">Your FERRO (iron) Wallet</h3>
+                                        <p class="mb-4 text-white text-center">A secure smart contract wallet for storing your digital assets</p>
+                                        <!-- <p class="mb-4 text-white text-center" *ngIf="_wallets && _wallets.length>0"><b>{{_wallets[0]}}</b></p> -->
+                                        <div class="button-groups text-center"><a class="btn btn-sm btn-warning rounded-pill me-3" href="#">Learn More</a><a class="btn btn-sm btn-dark rounded-pill" href="#">Lock Wallet</a></div>
                                       </div>
                                     </div>
                                   </div>

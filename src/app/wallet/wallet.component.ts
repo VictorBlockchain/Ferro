@@ -25,6 +25,7 @@ export class WalletComponent implements OnInit,AfterViewInit {
   _profile:any;
   _message:any;
   _messagetype:any;
+  _wallets:any;
 
   constructor(private formBuilder: FormBuilder,private service_: SERVICE,private zone: NgZone, private cd: ChangeDetectorRef,private route: ActivatedRoute,private router: Router) {
 
@@ -54,11 +55,23 @@ export class WalletComponent implements OnInit,AfterViewInit {
     const results = await _query.first();
     if(results){
 
-      this._profile.name =  results.get('name')
-      this._profile.story =  results.get('story')
+      this._profile.name =  results.get('name');
+      this._profile.story =  results.get('story');
+      this.getwallets();
       // console.log(this._profile);
 
+    }else{
+      console.log('nothing saved')
     }
+  }
+
+  async getwallets(){
+
+    this._service.GETUSERWALLET(this._user)
+    .then((res:any)=>{
+      this._wallets = res[1];
+      //console.log(res);
+    })
   }
 
   async editprofile(){
@@ -78,7 +91,7 @@ export class WalletComponent implements OnInit,AfterViewInit {
     if(pass){
 
       this._message = '';
-      this._service.SETUSERWALLET(this._user,this._username, this._editProfile.controls.email.value,this._editProfile.controls.story.value, this._editProfile.controls.avatarcontract_.value, this._editProfile.controls.avatarid_.value)
+      this._service.SETUSERWALLET(this._user,this._username, this._editProfile.controls.email.value,this._editProfile.controls.story.value, this._editProfile.controls.avatarcontract.value, this._editProfile.controls.avatarid.value)
       .then((res:any)=>{
         console.log(res)
           if(res.success){

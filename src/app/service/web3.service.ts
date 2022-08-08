@@ -6,11 +6,6 @@ import { environment } from '../../environments/environment';
 declare var Moralis:any;
 declare var Web3:any;
 declare var $: any;
-// declare var web3:any;
-
-// const serverUrl = environment.moralisSerer;
-// const appId = environment.moralisKey;
-// Moralis.start({ serverUrl, appId });
 
 const ABIWALLETS = require('../contracts/abi/wallets.json');
 const WALLETS = environment.WALLETS;
@@ -33,7 +28,8 @@ async SETWEB3(): Promise<any>{
 
   await Moralis.enableWeb3();
   this.web3 = new Web3(Moralis.provider);
-  console.log(this.web3);
+  // console.log(this.web3);
+
 }
 
 public GETUSERWALLET(user_:any): Promise<string> {
@@ -86,16 +82,21 @@ public SETUSERWALLET(user_:any, username_:any, email_:any, story_:any, avatarcon
           }).on('receipt',(receipt:any)=>{
 
               const _uProfile = Moralis.Object.extend("profile");
-              const _p = new _uProfile(user_);
+              const _p = new _uProfile();
               _p.save({
 
+                user: user_,
                 email: email_,
                 story:story_,
                 avatarcontract_: avatarcontract_,
                 avatarid_: avatarid_,
                 name: username_
 
-              });
+              }).then(()=>{
+
+                console.log('saved it ' + user_);
+
+              })
           }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
           //console.log(confirmationNumber, receipt)
           }).on('error', console.error);
