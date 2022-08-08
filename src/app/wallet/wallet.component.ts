@@ -1,7 +1,14 @@
-import { Component, OnInit,AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ViewChildren, QueryList, NgZone, ChangeDetectionStrategy, ChangeDetectorRef, Input} from "@angular/core";
+import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
+import {  Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import { SERVICE } from '../service/web3.service';
+import { environment } from '../../environments/environment';
+declare var Moralis:any;
 declare var $: any;
-declare var swiper:any;
+const serverUrl = environment.moralisSerer;
+const appId = environment.moralisKey;
+Moralis.start({ serverUrl, appId });
 
 @Component({
   selector: 'app-wallet',
@@ -9,23 +16,48 @@ declare var swiper:any;
   styleUrls: ['./wallet.component.scss'],
 })
 export class WalletComponent implements OnInit,AfterViewInit {
-  quote: string | undefined;
-  isLoading = false;
 
-  constructor() {}
+  _editProfile: FormGroup;
+  _service:any;
+  _user:any;
+  _connected:any;
+  _profile:any;
+
+  constructor(private formBuilder: FormBuilder,private service_: SERVICE,private zone: NgZone, private cd: ChangeDetectorRef,private route: ActivatedRoute,private router: Router) {
+
+    this._service = service_;
+    this._profile = {};
+    this.createForm();
+
+  }
 
   ngOnInit() {
-    this.isLoading = true;
-    // this.quoteService
-    //   .getRandomQuote({ category: 'dev' })
-    //   .pipe(
-    //     finalize(() => {
-    //       this.isLoading = false;
-    //     })
-    //   )
-    //   .subscribe((quote: string) => {
-    //     this.quote = quote;
-    //   });
+
+        this._user = localStorage.getItem('user');
+        if(this._user){
+          this._connected = true;
+          this.start();
+          //this.router.navigate(['/wallet']);
+        }
+
+  }
+
+  async start(){
+
+    const _uProfile = Moralis.Object.extend("profile");
+    const _query = new Moralis.Query(_uProfile);
+    _query.equalTo('user',this._user);
+    const results = await _query.first();
+    if(results){
+
+      this._profile.name =  results.get('name')
+      this._profile.story =  results.get('story')
+      console.log(this._profile);
+
+    }
+  }
+
+  async editprofile(){
 
   }
 
@@ -55,4 +87,17 @@ export class WalletComponent implements OnInit,AfterViewInit {
     //   ],
     // });
   }
+
+  createForm(){
+
+  this._editProfile = this.formBuilder.group({
+
+    avatarcontract: [''],
+    avatarid: [''],
+    email: [''],
+    story: [''],
+
+  });
+
+}
 }

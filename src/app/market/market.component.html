@@ -1,37 +1,19 @@
-<div class="share-modal modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+<div class="share-modal modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-body p-4 text-center">
-            <h4 class="mb-4" id="reportModalLabel">Edit Profile</h4>
-            <form [formGroup]="_editProfile">
-              <div class="row g-4">
-                <div class="col-12">
-                  <input class="form-control bg-gray border-0" type="text" name="avatarcontract" placeholder="avatar nft contract" formControlName="avatarcontract">
-                </div>
-
-                <div class="col-12">
-                  <input class="form-control bg-gray border-0" type="number" name="avatar" placeholder="avatar id" formControlName="avatarid">
-                </div>
-                <div class="col-12">
-                  <input class="form-control bg-gray border-0" type="text" name="email" placeholder="Email" formControlName="email">
-                </div>
-                <div clas="col-12">
-                  <textarea class="form-control  bg-gray mb-3"  name="story" placeholder="your story..." formControlName="story"></textarea>
-
-                </div>
-                <div class="col-12 text-center">
-                  <button class="btn btn-primary btn-sm rounded-pill" (click)="editprofile()">Update</button>
-                </div>
-
+            <h4 class="mb-4" id="reportModalLabel">Why are you reporting?</h4>
+            <form action="#">
+              <textarea class="form-control mb-3" id="reportText" name="reportMessage" placeholder="Write your complaint..."></textarea>
+              <div class="d-flex align-items-center justify-content-between">
+                <button class="btn btn-danger btn-sm rounded-pill" type="button" data-bs-dismiss="modal" aria-label="Close"><i class="me-1 bi bi-x-lg"></i>Close</button>
+                <button class="btn btn-primary btn-sm rounded-pill" type="submit">Report</button>
               </div>
-
-
             </form>
           </div>
         </div>
       </div>
     </div>
-
     <div class="share-modal modal fade" id="copylinkModal" tabindex="-1" aria-labelledby="copylinkLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -64,9 +46,9 @@
               </div>
               <div class="col-12 col-sm-8 col-lg-9">
                 <div class="author-data">
-                  <h3 class="mb-2 author-name text-white">{{_profile.name || 'incognito'}}<a class="btn btn-warning btn-sm rounded-pill align-top ms-2 px-3 py-1" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="me-1 bi bi-pen"></i> Edit</a></h3>
-                  <div class="btn btn-minimal d-inline-block mb-3 text-white hover-warning">{{_user || '0x...'}}</div>
-                  <p class="w-75 mb-0">{{_profile.story || 'no story yet'}}</p>
+                  <h3 class="mb-2 author-name text-white">Designing World<a class="btn btn-warning btn-sm rounded-pill align-top ms-2 px-3 py-1" href="#">Follow</a></h3>
+                  <div class="btn btn-minimal d-inline-block mb-3 text-white hover-warning">@designing_world</div>
+                  <p class="w-75 mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rerum quaerat quis similique natus rem.</p>
                 </div>
               </div>
             </div>
@@ -76,7 +58,7 @@
             <button class="dropdown-toggle" id="dd9887" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
             <!-- Dropdown Menu -->
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dd9887" style="">
-              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="me-1 bi bi-share"></i>Edit Profile</a></li>
+              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="me-1 bi bi-share"></i>Edit Profile</a></li>
               <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="me-1 bi bi-share"></i>Share</a></li>
               <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#copylinkModal"><i class="me-1 bi bi-box-arrow-up-right"></i>Copy Link</a></li>
               <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="me-1 bi bi-flag"></i>Report</a></li>
@@ -93,94 +75,79 @@
                         <ul class="nav nav-tabs border-0 mb-3" role="tablist">
                           <li class="nav-item"><a class="position-relative nav-link mb-0 rounded-pill border-0 me-1 active" id="tab--1" data-bs-toggle="tab" href="#tab1" role="tab" aria-controls="tab1" aria-selected="true">Wallet</a></li>
                           <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--2" data-bs-toggle="tab" href="#tab2" role="tab" aria-controls="tab2" aria-selected="false">NFTs Minted</a></li>
-                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--3" data-bs-toggle="tab" href="#tab3" role="tab" aria-controls="tab3" aria-selected="false">NFT Tells</a></li>
-                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--4" data-bs-toggle="tab" href="#tab4" role="tab" aria-controls="tab4" aria-selected="false">ENS Tells</a></li>
-                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--5" data-bs-toggle="tab" href="#tab5" role="tab" aria-controls="tab5" aria-selected="false">Collections</a></li>
-                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--6" data-bs-toggle="tab" href="#tab6" role="tab" aria-controls="tab6" aria-selected="false">Family/Tribe</a></li>
+                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--2" data-bs-toggle="tab" href="#tab3" role="tab" aria-controls="tab2" aria-selected="false">NFT Tells</a></li>
+                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--2" data-bs-toggle="tab" href="#tab4" role="tab" aria-controls="tab2" aria-selected="false">ENS Tells</a></li>
+                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--2" data-bs-toggle="tab" href="#tab5" role="tab" aria-controls="tab2" aria-selected="false">Collections</a></li>
+                          <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--2" data-bs-toggle="tab" href="#tab6" role="tab" aria-controls="tab2" aria-selected="false">Family/Tribe</a></li>
 
 
                         </ul>
                         <div class="tab-content">
                           <!-- Tab Pane-->
                           <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab--1">
-                                <div class="row g-4">
-                                  <div class="col-12">
-                                    <div class="card dashboard-hero-card p-2 border-0 bg-img shadow-sm" style="background-image: url('assets/img/bg-img/44.jpeg')">
-                                      <div class="card-body p-4">
-                                        <h3 class="mb-3 text-white">FERRO (iron) Wallet</h3>
-                                        <p class="mb-4 text-white">A secure smart contract wallet for storing your digital assets</p>
-                                        <div class="button-groups"><a class="btn btn-sm btn-warning rounded-pill me-3" href="#">Add Wallet</a><a class="btn btn-sm btn-dark rounded-pill" href="#">Lock Wallet</a></div>
-                                      </div>
+                            <div class="card">
+                              <div class="card-body p-4 p-sm-5">
+                                <form action="#">
+                                  <div class="row g-4">
+                                    <div class="col-12">
+                                      <input class="form-control bg-gray border-0" type="text" name="fullName" placeholder="Full Name">
+                                    </div>
+                                    <div class="col-12">
+                                      <input class="form-control bg-gray border-0" type="email" name="email" placeholder="Email Address">
+                                    </div>
+                                    <div class="col-12">
+                                      <input class="form-control bg-gray border-0" type="text" name="username" placeholder="Username">
+                                    </div>
+                                    <div class="col-12">
+                                      <input class="form-control bg-gray border-0" type="password" name="password" placeholder="Password">
+                                    </div>
+                                    <div class="col-12">
+                                      <select class="filter-select2 w-100 bg-gray" style="display: none;">
+                                        <option selected="" value="1">Timezone</option>
+                                        <option value="2">UTC +0</option>
+                                        <option value="3">UTC +1</option>
+                                        <option value="4">UTC +2</option>
+                                        <option value="5">UTC +3</option>
+                                        <option value="6">UTC +4</option>
+                                        <option value="7">UTC +5</option>
+                                        <option value="8">UTC +6</option>
+                                        <option value="9">UTC +7</option>
+                                        <option value="10">UTC +8</option>
+                                        <option value="11">UTC +9</option>
+                                        <option value="12">UTC +10</option>
+                                      </select><div class="nice-select filter-select2 w-100 bg-gray  " tabindex="0">
+              <span class="current">Timezone</span>
+              <div class="nice-select-dropdown">
+              <div class="nice-select-search-box">
+            <input type="text" class="nice-select-search" placeholder="Search...">
+            </div>
+              <ul class="list"><li data-value="1" class="option selected null">Timezone</li><li data-value="2" class="option null">UTC +0</li><li data-value="3" class="option null">UTC +1</li><li data-value="4" class="option null">UTC +2</li><li data-value="5" class="option null">UTC +3</li><li data-value="6" class="option null">UTC +4</li><li data-value="7" class="option null">UTC +5</li><li data-value="8" class="option null">UTC +6</li><li data-value="9" class="option null">UTC +7</li><li data-value="10" class="option null">UTC +8</li><li data-value="11" class="option null">UTC +9</li><li data-value="12" class="option null">UTC +10</li></ul>
+              </div></div>
+
+                                    </div>
+                                    <div class="col-12">
+                                      <select class="filter-select w-100 bg-gray" style="display: none;">
+                                        <option selected="" value="1">Week starts on</option>
+                                        <option value="2">Saturday</option>
+                                        <option value="3">Sunday</option>
+                                        <option value="4">Monday</option>
+                                      </select><div class="nice-select filter-select w-100 bg-gray  " tabindex="0">
+              <span class="current">Week starts on</span>
+              <div class="nice-select-dropdown">
+
+              <ul class="list"><li data-value="1" class="option selected null">Week starts on</li><li data-value="2" class="option null">Saturday</li><li data-value="3" class="option null">Sunday</li><li data-value="4" class="option null">Monday</li></ul>
+              </div></div>
+
+                                    </div>
+                                    <div class="col-12">
+                                      <button class="btn btn-primary w-100 rounded-pill" type="submit"><i class="bi bi-sd-card-fill me-1"></i>Save changes</button>
                                     </div>
                                   </div>
-
-                                </div><!-- Welcomd -->
-                                <div class="row g-4 mt-2">
-                                  <div class="col-12 col-sm-6">
-                                    <div class="card border-0 shadow-sm">
-                                      <div class="card-body p-4">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                          <div>
-                                            <h5 class="mb-2">FERRO</h5><span>Priced To ETH</span>
-                                          </div>
-                                          <div class="ms-auto" id="chart-1" style="min-height: 42px;">
-                                            1.0001
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div class="col-12 col-sm-6">
-                                    <div class="card border-0 shadow-sm">
-                                      <div class="card-body p-4">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                          <div>
-                                            <h5 class="mb-2">Value</h5><span>1 FERRO = 0.003 ETH</span>
-                                          </div>
-                                          <div class="ms-auto" id="chart-2" style="min-height: 42px;">
-                                            $3,000
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div class="row g-4 mt-2">
-                                  <div class="col-12 col-sm-6">
-                                    <div class="card border-0 shadow-sm">
-                                      <div class="card-body p-4">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                          <div>
-                                            <h5 class="mb-2">WURA</h5><span>Priced To FERRO</span>
-                                          </div>
-                                          <div class="ms-auto" id="chart-1" style="min-height: 42px;">
-                                            1.0001
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div class="col-12 col-sm-6">
-                                    <div class="card border-0 shadow-sm">
-                                      <div class="card-body p-4">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                          <div>
-                                            <h5 class="mb-2">Value</h5><span>1 WURA = 0.003 FERRO</span>
-                                          </div>
-                                          <div class="ms-auto" id="chart-2" style="min-height: 42px;">
-                                            $3,000
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
+                                </form>
+                              </div>
+                            </div>
                           </div>
-
+                          <!-- Tab Pane-->
                           <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab--2">
                             <div class="card">
                               <div class="card-body p-4 p-sm-5">
@@ -229,23 +196,6 @@
                               </div>
                             </div>
                           </div>
-
-                          <div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab--3">
-                            tab 3
-                          </div>
-
-                          <div class="tab-pane fade" id="tab4" role="tabpanel" aria-labelledby="tab--4">
-                            tab 4
-                          </div>
-
-                          <div class="tab-pane fade" id="tab5" role="tabpanel" aria-labelledby="tab--5">
-                            tab 5
-                          </div>
-
-                          <div class="tab-pane fade" id="tab6" role="tabpanel" aria-labelledby="tab--6">
-                            tab 6
-                          </div>
-
                         </div>
                       </div>
                     </div>

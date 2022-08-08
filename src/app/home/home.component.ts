@@ -1,34 +1,13 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ViewChildren, QueryList, NgZone, ChangeDetectionStrategy, ChangeDetectorRef, Input} from "@angular/core";
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import {  Router, ActivatedRoute, ParamMap } from '@angular/router';
-// import { DeviceDetectorService } from 'ngx-device-detector';
-// import {
-//   Alchemy,
-//   Network,
-//   initializeAlchemy,
-//   getNftsForOwner,
-//   getNftMetadata,
-//   BaseNft,
-//   NftTokenType,
-// } from "@alch/alchemy-sdk";
-
-// const Moralis = require('moralis');
-// const axios = require('axios');
-// import moment from 'moment';
-import { environment } from '../../environments/environment';
 import { SERVICE } from '../service/web3.service';
-declare var ethereum: any;
-declare var window:any;
+import { environment } from '../../environments/environment';
+declare var Moralis:any;
 declare var $: any;
-
-// const settings = {
-//   apiKey:  environment.alchemykey, // Replace with your Alchemy API Key.
-//   network: Network.ETH_GOERLI, // Replace with your network.
-// };
-// const alchemy:any = initializeAlchemy(settings);
-// const web3 = AlchemyWeb3.createAlchemyWeb3(
-//   'https://eth-goerli.g.alchemy.com/v2/' + environment.alchemykey,
-// );
+const serverUrl = environment.moralisSerer;
+const appId = environment.moralisKey;
+Moralis.start({ serverUrl, appId });
 
 @Component({
   selector: 'app-home',
@@ -57,86 +36,76 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
 
     this._user = localStorage.getItem('user');
-
-    if (window.ethereum && !this._user) {
-        // this.pop('success', 'connect your wallet')
-        ethereum
-          .enable()
-          .then((accounts:any) => {
-            // Metamask is ready to go!
-            if(accounts){
-
-              this._user = accounts.toString();
-              localStorage.setItem('user',this._user);
-              this._connected = true;
-              this.getuserens();
-
-            }
-          })
-          .catch((reason:any) => {
-            // Handle error. Likely the user rejected the login.
-            console.log(reason)
-
-          });
-
-      }else if(window.ethereum && this._user) {
-        // The user doesn't have Metamask installed.
-        ethereum.enable();
-        this._connected = true;
-        this.getuserens();
-
-        // console.log(this._user);
-      }else{
-
-        this.pop('error','meta mask not accessible');
-      }
-
+    if(this._user){
+      this._connected = true;
+      //this.router.navigate(['/wallet']);
+    }
   }
 
-  async getConnected(){
+  async getConnected() {
 
-    if (window.ethereum) {
+    let user = Moralis.User.current();
 
-        ethereum
-          .enable()
-          .then((accounts:any) => {
-            // Metamask is ready to go!
-            if(accounts){
+    if (! user) {
 
-              this._user = accounts.toString();
-              localStorage.setItem('user',this._user);
-              this._connected = true;
-              this.getuserens();
+      user = await Moralis.authenticate({
+        signingMessage: "Login & TellAFriend",
+      })
+        .then((res:any)=>{
 
-            }
-          })
-          .catch((reason:any) => {
-            // Handle error. Likely the user rejected the login.
-            console.log(reason)
+          this._user = res.get("ethAddress");
+          localStorage.setItem('user',this._user);
 
-          });
-      } else {
-        // The user doesn't have Metamask installed.
-        this.pop('error','meta mask not accessible');
+          this._connected = true;
+          this.getusername();
 
-      }
+        })
+        .catch((error:any)=> {
+          console.log(error);
+        });
+
+    }else{
+
+      this._user = user.get("ethAddress");
+      this._connected = true;
+
+      this.getusername();
 
     }
 
+  }
+
+  async getusername(){
+
+    // get ENS domain of an address
+    const options = { address: this._user};
+    await Moralis.Web3API.resolve.resolveAddress(options)
+    .then((res:any)=>{
+
+      console.log(res)
+
+    })
+    .catch((error:any)=> {
+      console.log(error.name);
+    });
+
+  }
+
+  async logout() {
+    await Moralis.User.logOut();
+    this._connected = false
+    this._user = null;
+    localStorage.clear();
+
+    console.log("logged out");
+  }
+
   async getuserens(){
 
-    // const ensContractAddress = "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85";
-    // this._ENS = await getNftsForOwner(alchemy, this._user, {
-    //   contractAddresses: [ensContractAddress],
-    // });
-    // console.log(this._ENS);
-    // this.getusernft();
   }
 
 async getusernft(){
 
-  // this._NFT = await getNftsForOwner(alchemy, this._user);
-  // console.log(this._NFT);
 
 }
 
@@ -206,15 +175,7 @@ async createnfttell(nftid_:any, nftcontract_:any){
 
     })
   }
-  logout(){
 
-    // Moralis.User.logOut();
-    // this.pop('success','logging you out')
-    // this._connected = false
-    // this._user = null;
-    // localStorage.clear();
-
-  }
   private pop(type: any, message: any) {
     let title;
     if (type == 'error') {
