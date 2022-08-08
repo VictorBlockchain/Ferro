@@ -20,8 +20,11 @@ export class WalletComponent implements OnInit,AfterViewInit {
   _editProfile: FormGroup;
   _service:any;
   _user:any;
+  _username:any;
   _connected:any;
   _profile:any;
+  _message:any;
+  _messagetype:any;
 
   constructor(private formBuilder: FormBuilder,private service_: SERVICE,private zone: NgZone, private cd: ChangeDetectorRef,private route: ActivatedRoute,private router: Router) {
 
@@ -34,6 +37,7 @@ export class WalletComponent implements OnInit,AfterViewInit {
   ngOnInit() {
 
         this._user = localStorage.getItem('user');
+        this._username = localStorage.getItem('username');
         if(this._user){
           this._connected = true;
           this.start();
@@ -52,13 +56,38 @@ export class WalletComponent implements OnInit,AfterViewInit {
 
       this._profile.name =  results.get('name')
       this._profile.story =  results.get('story')
-      console.log(this._profile);
+      // console.log(this._profile);
 
     }
   }
 
   async editprofile(){
 
+    let pass = true;
+    if(!this._editProfile.controls.email.value){
+
+      this._message = 'whats your email?';
+      pass = false;
+
+    }
+    if(!this._editProfile.controls.story.value && pass){
+
+      this._message = 'whats your story?';
+      pass = false;
+    }
+    if(pass){
+
+      this._message = '';
+      this._service.SETUSERWALLET(this._user,this._username, this._editProfile.controls.email.value,this._editProfile.controls.story.value, this._editProfile.controls.avatarcontract_.value, this._editProfile.controls.avatarid_.value)
+      .then((res:any)=>{
+        console.log(res)
+          if(res.success){
+
+          }else{
+
+          }
+      })
+    }
   }
 
   ngAfterViewInit() {

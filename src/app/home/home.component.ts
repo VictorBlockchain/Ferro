@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms'
 import {  Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { SERVICE } from '../service/web3.service';
 import { environment } from '../../environments/environment';
+const address0 = environment.address0;
 declare var Moralis:any;
 declare var $: any;
 const serverUrl = environment.moralisSerer;
@@ -15,6 +16,9 @@ Moralis.start({ serverUrl, appId });
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
+
+  @ViewChild('profile') profile: ElementRef;
+  @ViewChild('profileclose') profileclose: ElementRef;
 
   _createTell: FormGroup;
   _bid: FormGroup;
@@ -38,6 +42,7 @@ export class HomeComponent implements OnInit {
     this._user = localStorage.getItem('user');
     if(this._user){
       this._connected = true;
+      this.start();
       //this.router.navigate(['/wallet']);
     }
   }
@@ -57,7 +62,7 @@ export class HomeComponent implements OnInit {
           localStorage.setItem('user',this._user);
 
           this._connected = true;
-          this.getusername();
+          this.start();
 
         })
         .catch((error:any)=> {
@@ -69,25 +74,42 @@ export class HomeComponent implements OnInit {
       this._user = user.get("ethAddress");
       this._connected = true;
 
-      this.getusername();
+      this.start();
 
     }
 
   }
 
-  async getusername(){
+  async start(){
 
-    // get ENS domain of an address
-    const options = { address: this._user};
-    await Moralis.Web3API.resolve.resolveAddress(options)
+    this._service.GETUSERWALLET(this._user)
     .then((res:any)=>{
+      if(res[0] == address0){
 
-      console.log(res)
+        this.profile.nativeElement.click();
+        setTimeout(() => {
 
+          this.profileclose.nativeElement.click();
+
+          this.router.navigate(['/wallet']);
+
+        }, 3000);
+      }else{
+        console.log(res[0])
+      }
+      //console.log(res);
     })
-    .catch((error:any)=> {
-      console.log(error.name);
-    });
+    // get ENS domain of an address
+    // const options = { address: this._user};
+    // await Moralis.Web3API.resolve.resolveAddress(options)
+    // .then((res:any)=>{
+    //
+    //   console.log(res)
+    //
+    // })
+    // .catch((error:any)=> {
+    //   console.log(error.name);
+    // });
 
   }
 

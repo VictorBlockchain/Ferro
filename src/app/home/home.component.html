@@ -1,3 +1,21 @@
+<div class="share-modal modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body p-4 text-center">
+            <h4 class="mb-4" id="reportModalLabel">profile missing</h4>
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="text-center" style="font-size:18px">Create Your Profile To Get Started</h4>
+                </div>
+              </div>
+              <div class="col-12 text-center">
+                <button class="btn btn-danger btn-sm rounded-pill mt-4" #profileclose type="button" data-bs-dismiss="modal" aria-label="Close"><i class="me-1 bi bi-x-lg"></i>Close</button>
+              </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="welcome-area pt-120">
       <div class="container">
         <div class="row justify-content-center">
@@ -35,6 +53,7 @@
               <div class="card-body p-4 text-center"><img class="mb-3 mx-auto" src="assets/img/illustrator/2.png" alt="">
                 <h5 class="mb-3">Bid Reflections</h5>
                 <p class="mb-0">1% of bid amount back to bidders, make $$ bidding</p>
+                <button class="btn btn-primary primaryBtn" #profile type="button" style="display:none" data-bs-toggle="modal" data-bs-target="#messageModal"></button>
               </div>
               <!-- Step -->
               <div class="step-number">2</div>

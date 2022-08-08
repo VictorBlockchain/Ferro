@@ -37,7 +37,8 @@
               "src/assets/js/alchemyWeb3.min.js",
               "src/assets/js/all-js-libraries.js",
               "src/assets/js/active.js",
-              "src/assets/js/moralis.js"
+              "src/assets/js/web3.min.js",
+              "src/assets/js/moralis.js",
             ]
           },
           "configurations": {

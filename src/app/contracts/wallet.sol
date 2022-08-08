@@ -822,20 +822,21 @@ contract NFTWALLET is ERC721Holder, ERC1155Holder {
     event deposit(
         address sender,
         uint256 amount,
-        address contract,
+        address x0
     );
     event withdraw(
 
         address receiver,
         uint256 amount,
-        address contract,
+        address x0
     );
     bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
     bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
 
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public _nftcontract;
-    uint255 public _nftid;
+    uint256 public _nftid;
+    uint256 public _unlockdate;
 
     constructor(address nftcontract_, uint256 nftid_) {
 
@@ -860,8 +861,8 @@ contract NFTWALLET is ERC721Holder, ERC1155Holder {
       } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
 
           IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(msg.sender, tokenid_) >= quantity_, "you have nnot enough");
-          nft.safeTransferFrom(msg.sender, address(this), tokenid_, quantity_, bytes(""));
+          require(nft.balanceOf(msg.sender, tokenid_) >= nftinquantity_, "you have nnot enough");
+          nft.safeTransferFrom(msg.sender, address(this), tokenid_, nftinquantity_, bytes(""));
 
       } else {
 
@@ -913,11 +914,13 @@ contract NFTWALLET is ERC721Holder, ERC1155Holder {
 
           IERC721 nft = IERC721(nftoutcontract_);
           require(nft.ownerOf(nftouttokenid_) == address(this), "nft not in this wallet");
+          nft.safeTransferFrom(address(this), msg.sender, nftouttokenid_);
 
       } else if (IERC165(nftoutcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
 
           IERC1155 nft = IERC1155(nftoutcontract_);
           require(nft.balanceOf(address(this), nftouttokenid_) > nftoutquantity_, "not enough nfts in this wallet");
+            nft.safeTransferFrom(address(this), msg.sender, nftouttokenid_, nftoutquantity_, '');
 
       } else {
 
@@ -925,7 +928,7 @@ contract NFTWALLET is ERC721Holder, ERC1155Holder {
       }
     }
 
-    function withdraweth(address nftcontract_, uint256 tokenid_) public{
+    function withdraweth(address nftcontract_, uint256 tokenid_) public returns(bool){
 
       require(nftcontract_ == _nftcontract && tokenid_ == _nftid, 'this wallet is not for that nft');
 
@@ -943,8 +946,8 @@ contract NFTWALLET is ERC721Holder, ERC1155Holder {
 
           revert("invalid nft address");
       }
-        payable(msg.sender).call{value: address(this).balance}("");
-
+        (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
+        return success;
     }
 
     function transfertoken(address nftcontract_, uint256 tokenid_, address token_, uint256 value_) public {
@@ -1002,13 +1005,13 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
     event deposit(
         address sender,
         uint256 amount,
-        address contract,
+        address x0
     );
     event withdraw(
 
         address receiver,
         uint256 amount,
-        address contract,
+        address x0
     );
     bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
     bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
@@ -1016,13 +1019,13 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
     uint256 public _unlockdate;
     bool private _backupaccessonly;
     bool private _backupaccessadded;
-    address private owner;
-    string public createdby;
+    address private _owner;
+    string public _name;
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    constructor(address owner_, string memory createdby_) {
-      owner = owner_;
-      createdby = createdby_;
+    constructor(address owner_, string memory name_) {
+      _owner = owner_;
+      _name = name_;
     }
 
     receive () external payable {}
@@ -1035,7 +1038,7 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
 
       }else{
 
-        require(msg.sender == owner_, 'you are not the owner of this wallet');
+        require(msg.sender == _owner, 'you are not the owner of this wallet');
 
       }
 
@@ -1046,7 +1049,7 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
 
     function turnonbackupaccess() public {
 
-      require(_backupaccess[msg.sender] || msg.sender == owner_, 'you cannot do that');
+      require(_backupaccess[msg.sender] || msg.sender == _owner, 'you cannot do that');
       _backupaccessonly = true;
 
     }
@@ -1058,20 +1061,20 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
 
     }
 
-    function holdnft(address nftcontract_, uint256 tokenid_) public {
+    function holdnft(address nftcontract_, uint256 tokenid_, uint256 quantity_) public {
 
-        require(msg.sender == owner_, 'you are not the owner of this wallet');
+        require(msg.sender == _owner, 'you are not the owner of this wallet');
 
-      if (IERC165(nftAddress_).supportsInterface(INTERFACE_ID_ERC721)) {
+      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
 
-          IERC721 nft = IERC721(nftAddress_);
+          IERC721 nft = IERC721(nftcontract_);
           require(nft.ownerOf(tokenid_) == msg.sender, "you do not have this");
           require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
           nft.safeTransferFrom(msg.sender, address(this), tokenid_);
 
-      } else if (IERC165(nftAddress_).supportsInterface(INTERFACE_ID_ERC1155)) {
+      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
 
-          IERC1155 nft = IERC1155(nftAddress_);
+          IERC1155 nft = IERC1155(nftcontract_);
           require(nft.balanceOf(msg.sender, tokenid_) >= quantity_, "you have nnot enough");
           nft.safeTransferFrom(msg.sender, address(this), tokenid_, quantity_, bytes(""));
 
@@ -1086,7 +1089,7 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
 
         if(!_backupaccessonly){
 
-          require(msg.sender == owner_, 'you are not the owner of this wallet');
+          require(msg.sender == _owner, 'you are not the owner of this wallet');
 
         }else{
 
@@ -1113,11 +1116,11 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
       }
     }
 
-    function withdraweth() public{
+    function withdraweth() public returns(bool){
 
       if(!_backupaccessonly){
 
-        require(msg.sender == owner_, 'you are not the owner of this wallet');
+        require(msg.sender == _owner, 'you are not the owner of this wallet');
 
       }else{
 
@@ -1126,7 +1129,9 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
       }
 
         require(block.timestamp > _unlockdate, 'wallet is locked');
-        payable(msg.sender).call{value: address(this).balance}("");
+        (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
+        return success;
+
 
     }
 
@@ -1134,7 +1139,7 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
 
       if(!_backupaccessonly){
 
-        require(msg.sender == owner_, 'you are not the owner of this wallet');
+        require(msg.sender == _owner, 'you are not the owner of this wallet');
 
       }else{
 
@@ -1142,7 +1147,7 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
 
       }
       require(block.timestamp > _unlockdate, 'wallet is locked');
-      require(msg.sender == owner_ || _backupaccess, 'you are not the owner of this wallet');
+      require(msg.sender == _owner || _backupaccess[msg.sender], 'you are not the owner of this wallet');
       require(IERC20(token_).balanceOf(address(this))>0 , 'no balance');
       IERC20(token_).safeTransfer(msg.sender,value_);
 
@@ -1152,7 +1157,7 @@ contract USERWALLET is ERC721Holder, ERC1155Holder {
 
       if(!_backupaccessonly){
 
-        require(msg.sender == owner_, 'you are not the owner of this wallet');
+        require(msg.sender == _owner, 'you are not the owner of this wallet');
 
       }else{
 
@@ -1174,16 +1179,17 @@ contract FERRO_WALLETS  {
 
    constructor() {}
 
-  function CREATEUSERWALLET(address user_, string memory by_) public returns(address) {
+  function CREATEUSERWALLET(address user_, string memory name_) public returns(address) {
 
-    address wallet_ = address(new USERWALLET(user_, by_));
-    if(_user2wallet[for_]==address(0)){
+    address wallet_ = address(new USERWALLET(user_, name_));
+    if(_user2wallet[user_]==address(0)){
 
-      _user2wallet[for_] = wallet_;
+      _user2wallet[user_] = wallet_;
 
     }
-    _user2wallets[for_].push(wallet_);
-    return wallet;
+    _user2wallets[user_].push(wallet_);
+
+    return wallet_;
 
   }
 
@@ -1195,21 +1201,21 @@ contract FERRO_WALLETS  {
     require(wallet_!=address(0), 'error creating wallet');
 
     _nftid2nftcontract2wallet[nftid_][nftcontract_] = wallet_;
-    wallets_.push(wallet_);
+    _nftwallets.push(wallet_);
 
     return wallet_;
 
   }
 
-  function GETNFTWALLET(address nftcontract_, uint256 nftid_) public returns(address, address[] memory) {
+  function GETNFTWALLET(address nftcontract_, uint256 nftid_) public view returns(address, address[] memory) {
 
-    return (_nftid2nftcontract2wallet[nftid_][nftcontract_], _wallets);
+    return (_nftid2nftcontract2wallet[nftid_][nftcontract_], _nftwallets);
 
   }
 
-  function GETUSERWALLET(address user_) public returns(address, address[] memory) {
+  function GETUSERWALLET(address user_) public view returns(address, address[] memory) {
 
-    return (_user2wallet[friend_], _user2wallets[friend_]);
+    return (_user2wallet[user_], _user2wallets[user_]);
 
   }
 }
