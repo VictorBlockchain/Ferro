@@ -1,7 +1,5 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
-import { SharedModule } from '@shared';
 import { MintComponent } from './mint.component';
 
 describe('MintComponent', () => {
@@ -10,7 +8,6 @@ describe('MintComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, HttpClientTestingModule],
       declarations: [MintComponent],
       providers: [],
     }).compileComponents();

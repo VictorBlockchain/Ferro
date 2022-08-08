@@ -12,8 +12,8 @@ import { environment } from '../../environments/environment';
 //   BaseNft,
 //   NftTokenType,
 // } from "@alch/alchemy-sdk";
-const ABITELL = require('../../build/contracts/tellafriend/tellafriend.json');
-const ABIVAULT721 = require('../../build/contracts/tellafriend/vault721.json');
+const ABITELL = require('../contracts/abi/721.json');
+const ABIVAULT721 = require('../contracts/abi/1155.json');
 // const web3 = createAlchemyWeb3(
 //   "https://eth-testnet.alchemyapi.io/v2/"+environment.alchemykey,
 // );

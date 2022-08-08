@@ -6,9 +6,15 @@
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "noImplicitAny":true,
+    "noImplicitThis":true,
+    "alwaysStrict":true,
+    "strictNullChecks":true,
+    "strictFunctionTypes":true,
+    "strictPropertyInitialization":false,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "declaration": false,
@@ -16,17 +22,23 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2017",
-    "module": "es2020",
+    "skipLibCheck":true,
+    "esModuleInterop":true,
+    "target": "es2015",
+    "types" : ["node","jest"],
+    "typeRoots": [
+      "node_modules/@types"
+    ],
     "lib": [
-      "es2020",
-      "dom"
-    ]
+      "es2018",
+      "dom",
+      "esnext.bigint"
+
+    ],
+    "module": "es2020"
   },
   "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
   }
 }

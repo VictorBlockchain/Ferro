@@ -1,7 +1,5 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
-import { SharedModule } from '@shared';
 import { BidComponent } from './bid.component';
 
 describe('BidComponent', () => {
@@ -10,7 +8,6 @@ describe('BidComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, HttpClientTestingModule],
       declarations: [BidComponent],
       providers: [],
     }).compileComponents();

@@ -1,7 +1,6 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { SharedModule } from '@shared';
 import { WalletComponent } from './wallet.component';
 
 describe('WalletComponent', () => {
@@ -10,7 +9,6 @@ describe('WalletComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, HttpClientTestingModule],
       declarations: [WalletComponent],
       providers: [],
     }).compileComponents();

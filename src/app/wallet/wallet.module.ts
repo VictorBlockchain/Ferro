@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '@shared';
 import { WalletRoutingModule } from './wallet-routing.module';
 import { WalletComponent } from './wallet.component';
+import { ReactiveFormsModule } from "@angular/forms";
 
 @NgModule({
-  imports: [CommonModule, SharedModule, WalletRoutingModule],
+  imports: [CommonModule, WalletRoutingModule,ReactiveFormsModule],
   declarations: [WalletComponent],
 })
 export class WalletModule {}

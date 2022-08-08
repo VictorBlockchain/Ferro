@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { environment } from '@env/environment';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-about',
@@ -8,7 +8,6 @@ import { environment } from '@env/environment';
   styleUrls: ['./about.component.scss'],
 })
 export class AboutComponent implements OnInit {
-  version: string | null = environment.version;
 
   constructor() {}
 
