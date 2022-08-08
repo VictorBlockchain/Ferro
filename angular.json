@@ -24,12 +24,20 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
+              "src/apple-touch-icon.png",
+              "src/robots.txt",
+              "src/manifest.webmanifest",
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/assets/css/all-css-libraries.css",
+              "src/assets/css/style.css"
             ],
-            "scripts": []
+            "scripts": [
+              "src/assets/js/alchemyWeb3.min.js",
+              "src/assets/js/all-js-libraries.js",
+              "src/assets/js/active.js",
+            ]
           },
           "configurations": {
             "production": {
