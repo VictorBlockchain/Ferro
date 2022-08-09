@@ -2,11 +2,13 @@
       <div class="container">
         <div class="breadcrumb-content">
           <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="_collectionid">New Mint</h2>
-          <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid">Choose Collection</h2>
+          <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && !_showcreatecollection">Choose Collection</h2>
+          <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && _showcreatecollection">Create Collection</h2>
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb justify-content-center">
               <li class="breadcrumb-item"><a href="javascript: void(0)" routerLink="/home" data-aos-duration="750" data-aos-delay="600">Home</a></li>
-              <li class="breadcrumb-item active" aria-current="page" data-aos-duration="750" data-aos-delay="600">New Mint</li>
+              <li class="breadcrumb-item active" aria-current="page" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && !_showcreatecollection">New Mint</li>
+              <li class="breadcrumb-item active" aria-current="page" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && _showcreatecollection" (click)="_showcreatecollection = false">Back</li>
             </ol>
           </nav>
         </div>
@@ -14,7 +16,7 @@
     </div>
     <div class="container" *ngIf="_showcreatecollection">
         <div class="row g-4 justify-content-center">
-          <div class="col-12 col-lg-10 col-xl-9 col-xxl-8">
+          <div class="col-12 col-lg-12 col-xl-12 col-xxl-12">
             <ul class="nav nav-tabs border-0 mb-3" role="tablist">
               <li class="nav-item"><a class="position-relative nav-link mb-0 rounded-pill border-0 me-1 active" id="tab--1" data-bs-toggle="tab" href="#tab1" role="tab" aria-controls="tab1" aria-selected="true">General</a></li>
               <li class="nav-item"><a class="nav-link mb-0 rounded-pill border-0 me-1" id="tab--2" data-bs-toggle="tab" href="#tab2" role="tab" aria-controls="tab2" aria-selected="false">Co-Minting</a></li>
@@ -22,33 +24,55 @@
             <div class="tab-content">
               <!-- Tab Pane-->
               <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab--1">
-                <div class="card">
-                  <div class="card-body p-4 p-sm-5">
-                    <form [formGroup]="_collection">
-                      <div class="row g-4">
-                        <div class="col-12">
-                          <div class="form-group">
-                            <label class="mb-4 fz-16" for="title">Collection Type </label><br>
+                <div class="row">
+                  <div class="col-12 col-sm-8 col-lg-8">
+                    <div class="card">
+                      <div class="card-body p-4 p-sm-5">
+                        <form [formGroup]="_collection">
+                          <div class="row g-4">
+                            <div class="col-12">
+                              <div class="form-group">
+                                <label class="mb-4 fz-16" for="title">Collection Type </label><br>
 
-                            <div class="form-check form-check-inline" *ngFor="let data of _collectionoptions">
-                              <input class="form-check-input" type="radio" name="inlineRadioOptions" checked="0" [value]="data.id" (change)="onCheckboxChange($event,2)">
-                              <label class="form-check-label text-white">{{data.name}}</label>
+                                <div class="form-check form-check-inline" *ngFor="let data of _collectionoptions">
+                                  <input class="form-check-input" type="radio" name="inlineRadioOptions" checked="0" [value]="data.id" (change)="onCheckboxChange($event,2)">
+                                  <label class="form-check-label text-white">{{data.name}}</label>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-12">
+                              <input class="form-control bg-gray border-0" type="text" placeholder="Collection Name" formControlName="title">
+                            </div>
+                            <div class="col-12">
+                              <textarea class="form-control  bg-gray border-0" cols="10" rows="5" placeholder="Short Description" formControlName="desc"></textarea>
+                            </div>
+                            <div class="col-6 form-group mb-4">
+                              <input class="form-control bg-transparent btn btn-dark w-100 rounded-pill" id="formFileMultiple" type="file" multiple="" (change)="upload($event,2)">
+                              <!-- <button class="btn btn-dark w-100 rounded-pill" (click)="upload($event, 2)"><i class="bi bi-sd-card-fill me-1"></i>Upload Image</button> -->
+                            </div>
+
+                            <div class="col-6">
+                              <button class="btn btn-primary w-100 rounded-pill" (click)="createcollection()"><i class="bi bi-sd-card-fill me-1"></i>Create Collection</button>
                             </div>
                           </div>
-                        </div>
-                        <div class="col-12">
-                          <input class="form-control bg-gray border-0" type="text" placeholder="Collection Name" formControlName="title">
-                        </div>
-                        <div class="col-12">
-                          <textarea class="form-control  bg-gray border-0" cols="10" rows="5" placeholder="Short Description" formControlName="desc"></textarea>
-                        </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
 
-                        <div class="col-12">
-                          <button class="btn btn-primary w-100 rounded-pill" (click)="createcollection()"><i class="bi bi-sd-card-fill me-1"></i>Create Collection</button>
+                  <div class="col-12 col-sm-8 col-lg-4">
+                    <!-- Preview Card -->
+                    <div class="nft-card card shadow-sm">
+                      <div class="card-body">
+                        <div class="img-wrap"><img src="{{_collectionimage || 'assets/img/bg-img/17.jpeg'}}" alt="">
+                          <!-- Badge -->
+                          <div class="badge bg-dark position-absolute"><img src="assets/img/core-img/fire.png" alt="">collection image</div>
                         </div>
                       </div>
-                    </form>
+                    </div>
+                    <h5 class="mb-0 mt-3 text-center"><i class="bi bi-eye me-1"></i>Live Preview</h5>
                   </div>
+
                 </div>
               </div>
               <!-- Tab Pane-->
@@ -69,24 +93,21 @@
       </div>
     <div class="seller-wrapper" *ngIf="!_collectionid && !_showcreatecollection">
       <div class="container">
-        <div class="row g-4 justify-content-center">
-          <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4">
+        <div class="row g-4 justify-content-center" *ngIf="_collections && _collections.length>0">
+          <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4" *ngFor="let data of _collections">
             <!-- Single Card -->
             <div class="nft-card card seller-card shadow-sm">
-              <div class="card-body">
+              <div class="card-body" (click)="setcollection(data[0])">
                 <div class="row align-items-center g-3">
                   <div class="col-4">
-                    <div class="img-wrap"><img src="assets/img/bg-img/u1.jpeg" alt="">
-                      <div class="badge bg-danger position-absolute px-2 py-1">#1</div>
+                    <div class="img-wrap"><img src="{{data[3]}}" alt="">
+                      <div class="badge bg-danger position-absolute px-2 py-1">#{{data[0]}}</div>
                     </div>
                   </div>
                   <div class="col-8">
-                    <div class="name-author"><a class="name d-block hover-primary fw-bold text-truncate" href="#">Designing World<i class="bi bi-patch-check-fill ms-2 text-success" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Verified" aria-label="Verified"></i></a><a class="author d-block fz-14 hover-primary text-truncate" href="#">@designing_world</a>
+                    <div class="name-author">{{data[1]}}
                       <div class="price-bid d-flex align-items-center mt-3">
-                        <div class="price me-3">
-                          <h6 class="mb-0 d-inline-block fz-14 border border-2 rounded py-1 px-2">0.3 ETH</h6>
-                        </div>
-                        <p class="mb-0 lh-1 d-flex align-items-center fz-14"><i class="me-1 bi bi-gem"></i>637 Items</p>
+                        <p class="mb-0 lh-1 d-flex align-items-center fz-14">{{data[6].length}} Items</p>
                       </div>
                     </div>
                   </div>
@@ -95,53 +116,27 @@
             </div>
           </div>
 
-          <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4">
-            <!-- Single Card -->
-            <div class="nft-card card seller-card shadow-sm">
-              <div class="card-body">
-                <div class="row align-items-center g-3">
-                  <div class="col-4">
-                    <div class="img-wrap"><img src="assets/img/bg-img/u1.jpeg" alt="">
-                      <div class="badge bg-danger position-absolute px-2 py-1">#21</div>
-                    </div>
-                  </div>
-                  <div class="col-8">
-                    <div class="name-author"><a class="name d-block hover-primary fw-bold text-truncate" href="#">Style Wear<i class="bi bi-patch-check-fill ms-2 text-success" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Verified" aria-label="Verified"></i></a><a class="author d-block fz-14 hover-primary text-truncate" href="#">@style_wear</a>
-                      <div class="price-bid d-flex align-items-center mt-3">
-                        <div class="price me-3">
-                          <h6 class="mb-0 d-inline-block fz-14 border border-2 rounded py-1 px-2">0.5 ETH</h6>
-                        </div>
-                        <p class="mb-0 lh-1 d-flex align-items-center fz-14"><i class="me-1 bi bi-gem"></i>134 Items</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
-<div class="divider"></div>
-<div class="container">
-      <div class="cta-text bg-gradient p-4 p-sm-5 bg-primary aos-init aos-animate" data-aos="zoom-in" data-aos-duration="750" data-aos-delay="300">
-        <div class="row align-items-center">
-          <div class="col-12 col-md-8 col-lg-9">
-            <h2 class="mb-3 mb-md-0 aos-init aos-animate" data-aos="fade-up" data-aos-duration="750" data-aos-delay="600">Launch A Brand New Awesome Collection!</h2>
-          </div>
-          <div class="col-12 col-md-4 col-lg-3">
-            <div class="text-md-end"><a class="btn btn-warning rounded-pill aos-init aos-animate" href="javascript: void(0)" data-aos="zoom-in" data-aos-duration="750" data-aos-delay="900" (click)="_showcreatecollection = true">Get Started</a></div>
-          </div>
-        </div>
+<div class="container mt-4" *ngIf="!_collectionid && !_showcreatecollection">
+  <div class="cta-text bg-gradient p-4 p-sm-5 bg-primary aos-init aos-animate" data-aos="zoom-in" data-aos-duration="750" data-aos-delay="300">
+    <div class="row align-items-center">
+      <div class="col-12 col-md-8 col-lg-9">
+        <h2 class="mb-3 mb-md-0 aos-init aos-animate" data-aos="fade-up" data-aos-duration="750" data-aos-delay="600">Launch A Brand New Awesome Collection!</h2>
+      </div>
+      <div class="col-12 col-md-4 col-lg-3">
+        <div class="text-md-end"><a class="btn btn-warning rounded-pill aos-init aos-animate" href="javascript: void(0)" data-aos="zoom-in" data-aos-duration="750" data-aos-delay="900" (click)="_showcreatecollection = true">Get Started</a></div>
       </div>
     </div>
+  </div>
+</div>
     <div class="create-new-wrapper"  *ngIf="_collectionid">
       <div class="container">
         <div class="row g-5 justify-content-center">
           <div class="col-12 col-lg-8">
             <!-- Create New Form -->
             <div class="create-new-form border shadow-sm p-4 p-sm-5">
-              <h2 class="mb-4">Create new NFT</h2>
               <form [formGroup]="_mint">
                 <div class="row align-items-center">
                   <div class="col-12">

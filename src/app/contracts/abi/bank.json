@@ -1,0 +1,474 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "onERC1155BatchReceived",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "onERC1155Received",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "onERC721Received",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "tribe_",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "ferro_",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "wura_",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "nft_",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "wallets_",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "marketing_",
+				"type": "address"
+			}
+		],
+		"name": "setaddresses",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "nftid_",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "value_",
+				"type": "bool"
+			}
+		],
+		"name": "setapprovedswapnft",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "value_",
+				"type": "bool"
+			}
+		],
+		"name": "stopswap",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenin_",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenout_",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "sellamount_",
+				"type": "uint256"
+			}
+		],
+		"name": "swapattributeforattribute",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "buyamount_",
+				"type": "uint256"
+			}
+		],
+		"name": "swapethforferro",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "tokenin",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenout",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokeninamount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenoutamount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "holder",
+				"type": "address"
+			}
+		],
+		"name": "swapethferro",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenin",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "tokenout",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokeninamount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenoutamount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "holder",
+				"type": "address"
+			}
+		],
+		"name": "swapferroeth",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "sellamount_",
+				"type": "uint256"
+			}
+		],
+		"name": "swapferroforeth",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "date",
+				"type": "uint256"
+			}
+		],
+		"name": "swapstop",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenin",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenout",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokeninamount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenoutamount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "holder",
+				"type": "address"
+			}
+		],
+		"name": "swaptoken",
+		"type": "event"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	},
+	{
+		"inputs": [],
+		"name": "_burn",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "_isapprovedswapnft",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "_swaptimeout",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "NFT",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes4",
+				"name": "interfaceId",
+				"type": "bytes4"
+			}
+		],
+		"name": "supportsInterface",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "TRIBE",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "WALLETS",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]

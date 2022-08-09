@@ -812,6 +812,7 @@ interface i369{
 
   function CHECKCOUPON(uint256 wnft_) external pure returns(bool, uint256, uint256, uint256);
   function ISSUENEWMINT(address to_, uint256 amount_, uint256 tokenid_) external return (bool);
+  function CREATENFTWALLET(address nftcontract_, uint256 nftid_) external returns(address);
 
 }
 
@@ -872,6 +873,7 @@ contract NFT_WRAPPER is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply, Reentr
           WNFTID +=1;
           bool success = setURI(ipfs_);
           require(success, 'error setting uri');
+          (address wallet_) = i369(WALLETS).CREATENFTWALLET(address(this),WNFTID);
 
           _mint(msg.sender, WNFTID ,1 , data_);
 
@@ -906,7 +908,7 @@ contract NFT_WRAPPER is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply, Reentr
         (bool success,)  i369(MASTER).ISSUENEWMINT(msg.sender, amounttomint_, mint_);
         require(success, 'error minting new token');
       }
-      
+
       _wnft2redeems[wnft_] -= 1;
       return true;
 

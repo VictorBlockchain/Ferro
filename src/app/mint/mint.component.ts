@@ -1,34 +1,14 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ViewChildren, QueryList, NgZone, ChangeDetectionStrategy, ChangeDetectorRef, Input} from "@angular/core";
 import { FormGroup, FormBuilder, FormControl, Validators, FormArray } from '@angular/forms';
 import {  Router, ActivatedRoute, ParamMap } from '@angular/router';
-// import {
-//   Alchemy,
-//   Network,
-//   initializeAlchemy,
-//   getNftsForOwner,
-//   getNftMetadata,
-//   BaseNft,
-//   NftTokenType,
-// } from "@alch/alchemy-sdk";
-
-// const Moralis = require('moralis');
-// const axios = require('axios');
-// import moment from 'moment';
 import { environment } from '../../environments/environment';
 import { SERVICE } from '../service/web3.service';
-declare var ethereum: any;
-declare var window:any;
+const address0 = environment.address0;
+declare var Moralis:any;
 declare var $: any;
-declare var NiceSelect:any;
-
-// const settings = {
-//   apiKey:  environment.alchemykey, // Replace with your Alchemy API Key.
-//   network: Network.ETH_GOERLI, // Replace with your network.
-// };
-// const alchemy:any = initializeAlchemy(settings);
-// const web3 = AlchemyWeb3.createAlchemyWeb3(
-//   'https://eth-goerli.g.alchemy.com/v2/' + environment.alchemykey,
-// );
+const serverUrl = environment.moralisSerer;
+const appId = environment.moralisKey;
+// Moralis.start({ serverUrl, appId });
 
 @Component({
   selector: 'app-mint',
@@ -39,20 +19,31 @@ export class MintComponent implements OnInit {
 
   _collection: FormGroup;
   _mint: FormGroup;
-  _nfttype:any;
-  _collectiontype:any;
+  _nftcategory:any;
+  _nftimage:any;
+  _nftimagename:any;
+
+  _collectioncategory:any;
+  _collectionimage:any;
+  _collectionimagename:any;
+  _collectionid:any;
+
+  _collections:any;
+
+  _mediaurl:any;
+  _medianame:any;
+
   _termsagreed:any;
   _service:any;
   _user:any;
   _connected:any;
   _ismobile:any
+
   _ENS: any;
   _NFT: any;
   _fileUploading:any;
   _toFile:any;
-  _image:any;
-  _collectionimage:any;
-  _collectionid:any;
+  _imageuri:any;
 
   _showcreatecollection:any;
   _showcreatenft:any;
@@ -66,9 +57,10 @@ export class MintComponent implements OnInit {
     { id: 1, name: 'Art' },
     { id: 2, name: 'Music' },
     { id: 3, name: 'Video' },
-    { id: 4, name: 'Photography' },
-    { id: 5, name: 'NSFW Art' },
-    { id: 6, name: 'NSFW Photo' }
+    { id: 4, name: 'Promo\'s' },
+    { id: 5, name: 'Photography' },
+    { id: 6, name: 'NSFW Art' },
+    { id: 7, name: 'NSFW Photo' }
 
   ];
   constructor(private formBuilder: FormBuilder,private service_: SERVICE,private zone: NgZone, private cd: ChangeDetectorRef,private route: ActivatedRoute,private router: Router) {
@@ -82,76 +74,43 @@ export class MintComponent implements OnInit {
   ngOnInit() {
 
     this._user = localStorage.getItem('user');
+    if(this._user){
 
-    if (window.ethereum && !this._user) {
-        // this.pop('success', 'connect your wallet')
-        ethereum
-          .enable()
-          .then((accounts:any) => {
-            // Metamask is ready to go!
-            if(accounts){
+      this.getusercollections();
 
-              this._user = accounts.toString();
-              localStorage.setItem('user',this._user);
-              this._connected = true;
-              this.getusercollections();
-
-            }
-          })
-          .catch((reason:any) => {
-            // Handle error. Likely the user rejected the login.
-            console.log(reason)
-
-          });
-
-      }else if(window.ethereum && this._user) {
-        // The user doesn't have Metamask installed.
-        ethereum.enable();
-        this._connected = true;
-        this.getusercollections();
-
-        // console.log(this._user);
-      }else{
-
-        this.pop('error','meta mask not accessible');
-      }
-
+    }
   }
 
   async getConnected(){
 
-    if (window.ethereum) {
-
-        ethereum
-          .enable()
-          .then((accounts:any) => {
-            // Metamask is ready to go!
-            if(accounts){
-
-              this._user = accounts.toString();
-              localStorage.setItem('user',this._user);
-              this._connected = true;
-              this.getuserens();
-
-            }
-          })
-          .catch((reason:any) => {
-            // Handle error. Likely the user rejected the login.
-            console.log(reason)
-
-          });
-      } else {
-        // The user doesn't have Metamask installed.
-        this.pop('error','meta mask not accessible');
-
-      }
-
-    }
+  }
 
   async getusercollections(){
 
-  }
+    this._service.GETUSERCOLLECTIONS(this._user)
+    .then((res:any)=>{
+      this._collections = []
+      if(res.length>0){
+        for (let i = 0; i < res.length; i++) {
+          const element = res[i];
+          // console.log(element);
+            this._service.GETCOLLECTION(element)
+            .then((res:any)=>{
 
+              this._collections.push(res);
+
+            })
+        }
+
+
+      }
+    })
+
+  }
+  async setcollection(collectionid_:any) {
+    this._collectionid = collectionid_;
+    console.log(this._collectionid)
+  }
   async getuserens(){
 
     // const ensContractAddress = "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85";
@@ -171,10 +130,36 @@ async getusernft(){
 
 async upload(event:any, type:any){
 
-  // console.log(type);
   this._fileUploading = true;
-  this._toFile = event.target.files[0];
+  this._toFile = event.target.files[0]
+  const imageFile = new Moralis.File(this._toFile.name,this._toFile)
+  await imageFile.saveIPFS();
+  this._imageuri= await imageFile.ipfs();
+  this.zone.run(()=>{
+    if(type==1){
+      //nft image
+      this._nftimage = this._imageuri
+      this._nftimagename = this._toFile.name
+      this._fileUploading = false;
 
+    }else if(type==2){
+      //collection image
+      this._collectionimage = this._imageuri
+      this._collectionimagename = this._toFile.name
+      if(this._collectionimage){
+        this._fileUploading = false;
+      //  console.log(this.mediaURL)
+      }
+    }else if(type==3){
+//    media file
+      this._mediaurl = this._imageuri
+      this._medianame = this._toFile.name
+      if(this._mediaurl){
+        this._fileUploading = false;
+      //  console.log(this.mediaURL)
+      }
+    }
+  })
 }
 
 async createcollection(){
@@ -187,21 +172,27 @@ async createcollection(){
     pass = false;
 
   }
-  if(!this._collection.controls.title.value){
+  if(!this._collection.controls.title.value && pass){
 
     this.pop('error', 'whats the collection title?');
     pass = false;
 
   }
-  if(!this._collection.controls.desc.value){
+  if(!this._collection.controls.desc.value && pass){
 
     this.pop('error', 'whats the collection description?');
     pass = false;
 
   }
+  if(!this._collectioncategory && pass){
+
+    this.pop('error', 'whats the collection category?');
+    pass = false;
+
+  }
   if(pass){
 
-    this._service.createcollection(this._user,this._collectionimage,this._collection.controls.title.value,this._collection.controls.desc.value, this._collectiontype)
+    this._service.SETCOLLECTION(this._user,this._collectionimage,this._collection.controls.title.value,this._collection.controls.desc.value, this._collectioncategory)
     .then((res:any)=>{
 
     })
@@ -213,15 +204,9 @@ async createmint(){
     let payto_:any;
     let pass = true;
 
-    if(!this._image){
+    if(!this._nftimage){
 
       this.pop('error', 'whats the nft image?');
-      pass = false;
-
-    }
-    if(!this._nfttype && pass){
-
-      this.pop('error', 'what is the mint type?');
       pass = false;
 
     }
@@ -235,13 +220,6 @@ async createmint(){
 
       this.pop('error', 'what is the details?');
       pass = false;
-
-    }
-    if(!this._mint.controls.price.value && pass){
-
-      this.pop('error', 'what is the reserve price?');
-      pass = false;
-
 
     }
     if(!this._mint.controls.royalty.value && pass){
@@ -274,7 +252,7 @@ async createmint(){
       if(!payto_){
         payto_ = this._mint.controls.payaddress.value;
       }
-      this._service.createmint(this._user, this._mint.controls.title.value, this._mint.controls.desc.value, this._mint.controls.price.value, this._mint.controls.prints.value, payto_, this._nfttype)
+      this._service.createmint(this._user, this._nftimage, this._mint.controls.title.value, this._mint.controls.desc.value,  this._mint.controls.prints.value, payto_, this._mint.controls.royalty.value,this._mint.controls.redeems.value, this._nftcategory)
       .then((res:any)=>{
 
         if(res.success){
@@ -293,12 +271,12 @@ async createmint(){
 
      if (e.target.checked) {
         if(type_==1){
-          this._nfttype = e.target.value;
+          this._nftcategory = e.target.value;
 
         }else{
-          this._collectiontype = e.target.value;
+          this._collectioncategory = e.target.value;
         }
-       // console.log(this._nfttype);
+       // console.log(this._nftcategory);
      }
    }
    async onTermsChange(e:any) {

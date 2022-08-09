@@ -757,9 +757,9 @@ abstract contract ERC1155Burnable is ERC1155 {
 }
 interface i369 {
 
-  function GETNFTTOWRAP(uint256 nftid_) external returns(uint256,uint256[]);
-  function GETWALLET(address friend_) external returns(address, address[] memory);
-  function CREATEWALLET(address for_, string memory by_) external returns(address);
+  function GETNFTTOWRAP(uint256 nftid_) external pure returns(uint256,uint256[] memory);
+  function GETUSERWALLET(address user_) external returns(address, address[] memory);
+  function CREATENFTWALLET(address nftcontract_, uint256 nftid_) external returns(address);
 
 }
 contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply, ReentrancyGuard {
@@ -799,19 +799,20 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
        uint256 collection;
        uint256 mintamount;
        string ipfs;
+       address wallet;
 
      }
 
      NFTS[] public _nfts;
      struct ATTRIBUTES{
 
-       uint256 tokenid,
-       string name,
-       string representation,
-       string category_,
-       uint256 supply,
-       uint256 pricedto,
-       string uri
+       uint256 tokenid;
+       string name;
+       string representation;
+       string category;
+       uint256 supply;
+       uint256 pricedto;
+       string uri;
      }
      ATTRIBUTES[] public _attributes;
      mapping(uint256=>uint256) public _attribute2index;
@@ -833,7 +834,8 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
      address public NFTWRAPPER;
      address public NFTMARKET;
      address public BANK;
-     uint256 public constant FERRO;
+     address public WALLETS;
+     uint256 public FERRO;
 
     address public _burn = 0x000000000000000000000000000000000000dEaD;
 
@@ -844,7 +846,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
       BANK = bank_;
 
       ATTRIBUTES memory save_ = ATTRIBUTES({
-        tokendid: NFTID,
+        tokenid: NFTID,
         name: name_,
         representation: respresentation_,
         category: category_,
@@ -857,39 +859,35 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
       _attribute[NFTID] = save_;
       _attributecategory2tokens[category_].push(NFTID);
       FERRO = NFTID;
-      _mint(msg.sender, NFTID, 1000000*10**18, '');
+      _mint(bank_, NFTID, 1000000*10**18, '');
       _isjordi[msg.sender] = true;
       _isdata[msg.sender] = true;
 
     }
 
-    function ISSUENEWMINT(address to_, uint256 amount_, uint256 tokenid_) public return (bool){
+    function ISSUENEWMINT(address to_, uint256 amount_, uint256 tokenid_) public returns (bool){
 
       require(_isdata[msg.sender], 'you cannot do that');
 
-      (address ferrowallet_) = i369(BANK).GETWALLET(to_);
-      if(ferrowallet_==address(0)){
-        ferrowallet_ = i369(BANK).CREATEWALLET(to_, 'mint contract');
-      }
+      (address ferrowallet_,) = i369(WALLETS).GETUSERWALLET(to_);
       require(ferrowallet_!=address(0), 'create your ferro wallet');
 
       uint256 burned_ = balanceOf(_burn, tokenid_);
-      uint256 liquidity_ = balanceOf(BANK, tokenid_);
+    //   uint256 liquidity_ = balanceOf(BANK, tokenid_);
       uint256 supply_ = _attribute[tokenid_].supply;
-      // uint256 minttobank_= liquidity_.div(totalSupply(tokenid_)).mul(100);
+    //   uint256 minttobank_= liquidity_.div(totalSupply(tokenid_)).mul(100);
+
       bool success;
 
       if(tokenid_==1){
 
-        if(burned_.add(amount_)>SUPPLY){
+        if(burned_.add(amount_)>supply_){
 
-          amount_ = SUPPLY.sub(burned_);
+          amount_ = supply_.sub(burned_);
 
         }
 
       }else{
-
-        uint256 supply_ = _attribute[tokenid_].supply;
 
         if(burned_.add(amount_)>supply_){
 
@@ -904,23 +902,27 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
 
     }
 
-    function setmintnft(uint256 nftid_, uint256 tokentomint_, uint256 amounttomint_) public {
-      require(_isjordi[msg.sender], 'you are not that guy');
+    function setmintpromonft(uint256 nftid_, uint256 tokentomint_, uint256 amounttomint_) public {
+      ///// this allows an nft to mint mor attributes tokens to the owner of the nft
 
-      _attributes[nftid_].mint = tokentomint_;
-      _attributes[nftid_].mintamount = amounttomint_;
-      _attributes[nftid_].redeems = 1;
+      require(_isjordi[msg.sender], 'you are not that guy');
+      require(amounttomint_.add(totalSupply(tokentomint_)) < _attributes[tokentomint_].supply, 'over supply');
+
+      _nft[nftid_].mint = tokentomint_;
+      _nft[nftid_].mintamount = amounttomint_;
+      _nft[nftid_].redeems = 1;
 
     }
 
     function setattributetoken(string memory name_, string memory category_, string memory respresentation_, uint256 supply_, string memory uri_, uint256 pricedto_) public {
+      ////creats an attribute tokens
       require(_isjordi[msg.sender], 'you are not that guy');
 
       NFTID +=1;
       supply_ = supply_*10**18;
 
       ATTRIBUTES memory save_ = ATTRIBUTES({
-        tokendid: NFTID,
+        tokenid: NFTID,
         name: name_,
         representation: respresentation_,
         category: category_,
@@ -931,9 +933,10 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
       _attributes.push(save_);
       _attribute[NFTID] = save_;
       _attributecategory2tokens[category_].push(NFTID);
-      _mint(bank_, NFTID, supply_.div(100), '');
+      _mint(msg.sender, NFTID, 1, '');
 
     }
+
     function deleteattribute(uint256 id_) public {
 
       require(_isjordi[msg.sender], 'you are not that guy');
@@ -956,27 +959,26 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
 
         for (uint256 i = 0; i<_attributes.length; i++){
 
-          alltokenssupply_ += totalSupply(_attributes[i]).sub(balanceOf(_burn,_attributes[i]));
+          alltokenssupply_ += totalSupply(_attributes[i].supply).sub(balanceOf(_burn,_attributes[i].tokenid));
         }
 
-        alltokenssupply_ = supply_.add(alltokenssupply_);
+        alltokenssupply_ = tokensupply_.add(alltokenssupply_);
       }
       return (ferro_, tokensupply_, alltokenssupply_);
     }
 
-    function GETPRICEDTOSWAPSUPPLY(uint256 tokenin_, uint256 tokenout_) public view returns(uint256, uint256, uint256, uint256, uint256, uint256,uint256,uint256) {
+    function GETPRICEDTOSWAPSUPPLY(uint256 tokenin_, uint256 tokenout_) public view returns(uint256, uint256, uint256, uint256, uint256, uint256) {
 
-      uint256 ferro_ = totalSupply(1).sub(balanceOf(_burn,1));
-      uint256 wura_ = totalSupply(2).sub(balanceOf(_burn,2));
+      uint256 tokeninispriceto_ = _attributes[tokenin_].pricedto;
+      uint256 tokenoutispriceto_ = _attributes[tokenout_].pricedto;
 
-      uint256 tokeninpriceto_ = _attributes[tokenin_].pricedto;
-      uint256 tokenoutpriceto_ = _attributes[tokenout_].pricedto;
-      uint256 tokeninpricetosupply_ = totalSupply(tokeninpriceto_).sub(balanceOf(_burn,tokeninpriceto_));
-      uint256 tokenoutpricetosupply_ = totalSupply(tokenoutpriceto_).sub(balanceOf(_burn,tokenoutpriceto_));
+      uint256 tokeninpricedtosupply_ = totalSupply(tokeninispriceto_).sub(balanceOf(_burn,tokeninispriceto_));
+      uint256 tokenoutpricedtosupply_ = totalSupply(tokenoutispriceto_).sub(balanceOf(_burn,tokenoutispriceto_));
+
       uint256 tokeninsupply_ = totalSupply(tokenin_).sub(balanceOf(_burn,tokenin_));
       uint256 tokenoutsupply_ = totalSupply(tokenout_).sub(balanceOf(_burn,tokenout_));
 
-      return(ferrosupply_, wurasupply_, tokeninsupply_, tokenoutsupply_, tokeninpricetosupply_, tokenoutpricetosupply_, tokeninispriceto_, tokenoutispriceto_);
+      return(tokeninsupply_, tokenoutsupply_, tokeninpricedtosupply_, tokenoutpricedtosupply_, tokeninispriceto_, tokenoutispriceto_);
     }
 
     function GETPRICEDTOSUPPLY(uint256 tokenid_) public view returns(uint256, uint256, uint256, uint256,uint256) {
@@ -984,25 +986,26 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
       uint256 ispricedto_ = _attributes[tokenid_].pricedto;
       uint256 ferro_ = totalSupply(1).sub(balanceOf(_burn,1));
       uint256 wura_ = totalSupply(2).sub(balanceOf(_burn,2));
-      uint256 ispricedtotokensupply_ = totalSupply(pricedto_).sub(balanceOf(_burn,pricedto_));
+      uint256 ispricedtotokensupply_ = totalSupply(ispricedto_).sub(balanceOf(_burn,ispricedto_));
       uint256 tokensupply_ = totalSupply(tokenid_).sub(balanceOf(_burn,tokenid_));
 
-      return(ferro_, wura_, tokensupply, ispricedto_, ispricedtotokensupply_);
+      return(ferro_, wura_, tokensupply_, ispricedto_, ispricedtotokensupply_);
 
     }
 
-    function GETCIRCULATINGSUPPLY(uint256 tokenid_) public view returns(uint256) {
+    function GETTOKENCIRCULATINGSUPPLY(uint256 tokenid_) public view returns(uint256) {
 
-      return totalSupply(tokenid_).sub(balanceOf(_burn,tokenid_));;
+      return totalSupply(tokenid_).sub(balanceOf(_burn,tokenid_));
 
     }
 
-    function setcontracts(address market_, address wrapper_, address bank_) public {
+    function setcontracts(address market_, address wrapper_, address bank_, address wallet_) public {
 
         require(_isjordi[msg.sender], 'you are not that guy');
         NFTMARKET = market_;
         NFTWRAPPER = wrapper_;
         BANK = bank_;
+        WALLETS = wallet_;
 
     }
     function setdata(address data_, bool value_) public {
@@ -1017,7 +1020,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
         return true;
     }
 
-    function setcollection(string memory title_, string memory details_, string memory image_, string memory category_) public {
+    function setcollection(string memory title_, string memory details_, string memory image_, uint256 category_) public {
 
       COLLECTIONID += 1;
       COLLECTIONS memory save_ = COLLECTIONS({
@@ -1026,7 +1029,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
         details:details_,
         image: image_,
         creator: msg.sender,
-        category: category,
+        category: category_,
         nfts: new uint256[](0)
       });
       _collection[COLLECTIONID] = save_;
@@ -1043,24 +1046,24 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
 
     }
 
-    function getcollections(address user_) public returns (uint256[]){
+    function getcollections(address user_) public view returns (uint256[] memory){
 
       return _user2collections[user_];
     }
 
-    function getcollection(uint256 collectionid_) public returns (COLLECTIONS[] memory){
+    function getcollection(uint256 collectionid_) public view returns (COLLECTIONS memory){
 
       return _collection[collectionid_];
     }
 
-    function setminter(uint256 collection_, address minter_, bool value_) public {
+    function setpromominter(uint256 collection_, address minter_, bool value_) public {
 
       require(_collection[collection_].creator == msg.sender, 'you do not own this collection');
       _approved2mint2collection[minter_][collection_] = value_;
 
     }
 
-    function setmint(bytes memory data_, string memory ipfs_, uint256 collection_, uint256 type_, uint256 royalty_, uint256 quantity_, address payto_, uint256 redeems_ ) public
+function setnftmint(bytes memory data_, string memory ipfs_, uint256 collection_, uint256 royalty_, uint256 prints_, address payto_, uint256 redeems_, uint256 category_ ) public
     {
       require(_collection[collection_].creator == msg.sender || _approved2mint2collection[msg.sender][collection_], 'you are not approved to mint to this collection');
 
@@ -1068,29 +1071,35 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
 
       bool success = setURI(ipfs_);
       require(success, 'error setting uri');
+      address wallet_;
+      if(prints_==1){
+      (wallet_) = i369(WALLETS).CREATENFTWALLET(address(this),NFTID);
 
-      (address wallet_) = i369(BANK).CREATEWALLET();
-      
+      }else{
+          wallet_ = address(0);
+      }
+
       NFTS memory save_ = NFTS({
 
         id:NFTID,
-        category: type_,
+        category: category_,
         mint: 0,
         mintamount: 0,
         redeems: redeems_,
         royalty: royalty_,
         collection: collection_,
         payto: payto_,
-        ipfs: ipfs_
+        ipfs: ipfs_,
+        wallet:wallet_
       });
 
       _nft[NFTID] = save_;
       _nfts.push(save_);
       _collection[collection_].nfts.push(NFTID);
       _nft2collectionindex[NFTID] = _collection[collection_].nfts.length - 1;
-      _mint(_collection[collection_].creator, NFTID, quantity_, data_);
+      _mint(_collection[collection_].creator, NFTID, prints_, data_);
 
-      emit newMint(msg.sender, NFTID, ipfs_);
+     // emit newMint(msg.sender, NFTID, ipfs_);
 
     }
 
@@ -1112,22 +1121,22 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
 
       if(_nft[nftid_].category==3){
 
-        iscoupon = true;
+        iscoupon_ = true;
 
       }
       return (iscoupon_,_nft[nftid_].mint, _nft[nftid_].mintamount);
     }
 
-    function setkeyword(string memory keyword_, uint256 nftid_) public {
+    function setnftkeyword(string memory keyword_, uint256 nftid_) public {
 
       require(balanceOf(msg.sender, nftid_)>0, 'you do not own this nft');
-      _keyword2nft[keyword].push(nftid_);
+      _keyword2nft[keyword_].push(nftid_);
 
     }
 
-    function getkeyword(string memory keyword_) public returns(uint256[] memory){
+    function getnftbykeyword(string memory keyword_) public view returns(uint256[] memory){
 
-        returns _keyword2nft[keyword];
+        return _keyword2nft[keyword_];
     }
 
     function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)

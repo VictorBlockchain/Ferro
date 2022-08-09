@@ -811,7 +811,7 @@ interface i369{
 
     function GETCIRCULATINGSUPPLY(uint256 tokenid_) external pure returns(uint256);
     function GETPRICEDTOSUPPLY(uint256 tokenid_) external pure returns(uint256, uint256, uint256, uint256, uint256);
-    function GETPRICEDTOSWAPSUPPLY(uint256 tokenin_, uint256 tokenout_) external view returns(uint256, uint256, uint256, uint256, uint256, uint256,uint256,uint256);
+    function GETPRICEDTOSWAPSUPPLY(uint256 tokenin_, uint256 tokenout_) external view returns(uint256, uint256, uint256, uint256,uint256,uint256);
 
 }
 
@@ -823,25 +823,25 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
         address tokenin,
         uint256 tokenout,
         uint256 tokeninamount,
-        uint255 tokenoutamount,
+        uint256 tokenoutamount,
         address holder
     );
     event swapferroeth(
         uint256 tokenin,
         address tokenout,
         uint256 tokeninamount,
-        uint255 tokenoutamount,
+        uint256 tokenoutamount,
         address holder
     );
     event swaptoken(
         uint256 tokenin,
         uint256 tokenout,
         uint256 tokeninamount,
-        uint255 tokenoutamount,
+        uint256 tokenoutamount,
         address holder
     );
     event swapstop(
-        uint256 date,
+        uint256 date
     );
 
     bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
@@ -860,15 +860,12 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
 
     address public _burn = 0x000000000000000000000000000000000000dEaD;
     address public NFT;
-    address public FAMILY;
+    address public TRIBE;
+    address public WALLETS;
     address private _marketing;
 
-     constructor(address nft_, address family_, uint256 ferro_, uint256  wura_) {
+     constructor() {
 
-       NFT = nft_;
-       FAMILY = family_;
-       _ferro = ferro_;
-       _wura = wura_;
       _isjordi[msg.sender] = true;
       _swapstop = false;
       _lockafter = block.timestamp + 90 days;
@@ -877,19 +874,30 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
 
   receive () external payable {}
 
+    function setaddresses(address tribe_, uint256 ferro_, uint256 wura_, address nft_, address wallets_, address marketing_) public{
+        require(_isjordi[msg.sender], 'you are not that guy');
+
+        NFT = nft_;
+        TRIBE = tribe_;
+        WALLETS = wallets_;
+        _marketing = marketing_;
+        _ferro = ferro_;
+        _wura = wura_;
+
+    }
     function setapprovedswapnft(uint256 nftid_, bool value_) public {
 
         require(_isjordi[msg.sender], 'you are not that guy');
         _isapprovedswapnft[nftid_] = value_;
     }
 
-    function getethliquidity() internal returns (uint256){
+    function getethliquidity() internal view returns (uint256){
 
       return IERC20(WETH).balanceOf(address(this));
 
     }
 
-    function getpricedtoswapsupply(uint256 tokenout_, uint256 tokenin_) internal view returns(uint256, uint256, uint256, uint256, uint256, uint256,uint256,uint256){
+    function getpricedtoswapsupply(uint256 tokenout_, uint256 tokenin_) internal view returns(uint256, uint256, uint256, uint256,uint256,uint256){
 
      return i369(NFT).GETPRICEDTOSWAPSUPPLY(tokenout_, tokenin_);
 
@@ -905,10 +913,10 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
 
     function pricetokenout(uint256 tokenin_, uint256 tokenout_) internal view returns(uint256, uint256) {
 
-        (, , , uint256 tokenoutsupply_, ,, uint256 tokeninispricedto_, uint256 tokenoutispricedto_ ) = i369(NFT).GETPRICEDTOSWAPSUPPLY(tokenin_,tokenout_);
+        (uint256 tokeninsupply_ , uint256 tokenoutsupply_, ,, uint256 tokeninispricedto_, uint256 tokenoutispricedto_ ) = i369(NFT).GETPRICEDTOSWAPSUPPLY(tokenin_,tokenout_);
         (, , , uint256 liquiditywura_) = priceferro();
         uint256 tokenoutprice_;
-
+        uint256 tokeninprice_;
         if(tokeninispricedto_!=_wura && tokeninispricedto_!=_ferro){
 
         (, , , ,uint256 pricedtotokensupply1_) = i369(NFT).GETPRICEDTOSUPPLY(tokeninispricedto_);
@@ -934,7 +942,7 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
         return (tokeninprice_,tokenoutprice_);
     }
 
-    function swapferroforeth(uint256 sellamount_) public returns(bool){
+    function swapferroforeth(uint256 sellamount_) public{
 
     ///swap ferro for eth only... 10% fee applies
     require(!_swapstop, 'swaps stopped');
@@ -959,24 +967,22 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
 
             IERC1155(NFT).safeTransferFrom(address(this),_burn, _ferro, sellamount_.div(2), '');
             require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
-            if(FAMILY!=address(0)){
+            // if(FAMILY!=address(0)){
 
-              (address family_, address familyleader_ ) = i369(FAMILY).GETFAMILY(msg.sender);
+            //   (address tribe_, address familyleader_ ) = i369(FAMILY).GETFAMILY(msg.sender);
 
-              if(family_!=address(0) && familyleader_!=address(0)){
+            //   if(tribe_!=address(0) && familyleader_!=address(0)){
 
-                IERC1155(NFT).safeTransferFrom(address(this),family_, _ferro, familyfee_.div(2), '');
-                require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
-                IERC1155(NFT).safeTransferFrom(address(this),familyLeader_, _ferro, familyfee_.div(2), '');
-                require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
+            //     IERC1155(NFT).safeTransferFrom(address(this),tribe_, _ferro, familyfee_.div(2), '');
+            //     require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
+            //     IERC1155(NFT).safeTransferFrom(address(this),familyleader_, _ferro, familyfee_.div(2), '');
+            //     require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
 
-              }
-            }
+            //   }
+            // }
             IERC20(WETH).safeTransfer(_marketing, servicefee_);
             require(checkSuccess(), 'error sending eth of swap');
 
-
-    return success;
   }
 
   function swapethforferro(uint256 buyamount_) public {
@@ -996,21 +1002,21 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
 
       IERC20(WETH).safeTransferFrom(msg.sender,address(this), buyamount_);
       require(checkSuccess(), 'error paying swap');
-      IERC1155(NFT).safeTransferFrom(address(this), msg.sender, _ferro, tokenamount_, '');
+      IERC1155(NFT).safeTransferFrom(address(this), msg.sender, _ferro, ethamount_, '');
       require(checkSuccess(), 'error sending tokens swaped for eth');
-      if(FAMILY!=address(0)){
+    //   if(FAMILY!=address(0)){
 
-        (address family_, address familyleader_ ) = i369(FAMILY).GETFAMILY(msg.sender);
+    //     (address tribe_, address familyleader_ ) = i369(FAMILY).GETFAMILY(msg.sender);
 
-        if(family_!=address(0) && familyleader_!=address(0)){
+    //     if(tribe_!=address(0) && familyleader_!=address(0)){
 
-          IERC1155(NFT).safeTransferFrom(address(this),family_, _ferro, familyfee_.div(2), '');
-          require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
-          IERC1155(NFT).safeTransferFrom(address(this),family_, _ferro, familyLeader_.div(2), '');
-          require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
+    //       IERC1155(NFT).safeTransferFrom(address(this),tribe_, _ferro, familyfee_.div(2), '');
+    //       require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
+    //       IERC1155(NFT).safeTransferFrom(address(this),tribe_, _ferro, familyleader_.div(2), '');
+    //       require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
 
-        }
-      }
+    //     }
+    //   }
       IERC20(WETH).safeTransfer(_marketing, servicefee_);
       require(checkSuccess(), 'error sending eth of swap');
 
@@ -1025,7 +1031,7 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
     require(_isapprovedswapnft[tokenin_] && _isapprovedswapnft[tokenout_], 'this token is not approved to swap');
     /// calculate token out price... get the token its priced to
 
-    (, , , uint256 tokenoutsupply_, ,, , uint256 tokenoutispricedto_ ) = i369(NFT).GETPRICEDTOSWAPSUPPLY(tokenout_,tokenin_);
+    (, uint256 tokenoutsupply_, ,, , uint256 tokenoutispricedto_ ) = i369(NFT).GETPRICEDTOSWAPSUPPLY(tokenout_,tokenin_);
     (, uint256 liquidityferro_, , uint256 liquiditywura_) = priceferro();
 
     (uint256 tokeninprice_,uint256 tokenoutprice_) = pricetokenout(tokenin_,tokenout_);
@@ -1041,29 +1047,29 @@ contract FERRO_BANK is ERC721Holder, ERC1155Holder {
       tokenoutprice_ = liquidityferro_.div(tokenoutsupply_);
 
     }
-      uint256 amountout_ = sellamount_.sub(familyfee_).mul(tokeninprice_);
+      uint256 amountout_ = sellamount_.sub(1).mul(tokeninprice_);
               amountout_ = amountout_.div(tokenoutprice_);
               uint256 familyfee_ = amountout_.mul(3).div(100);
 
 
-      require(IERC1155(NFT).balanceOf(address(this),tokenout_) > amountout_, 'not enough liquidity token out')
+      require(IERC1155(NFT).balanceOf(address(this),tokenout_) > amountout_, 'not enough liquidity token out');
       IERC1155(NFT).safeTransferFrom(msg.sender, address(this), tokenin_, sellamount_, '');
       require(checkSuccess(), 'error swaping tokens in');
 
       IERC1155(NFT).safeTransferFrom(address(this), msg.sender, tokenout_, amountout_.sub(familyfee_), '');
       require(checkSuccess(), 'error swapping tokens out');
 
-      if(FAMILY!=address(0)){
+    //   if(FAMILY!=address(0)){
 
-        (address family_, address familyleader_ ) = i369(FAMILY).GETFAMILY(msg.sender);
+    //     (address tribe_, address familyleader_ ) = i369(FAMILY).GETFAMILY(msg.sender);
 
-        if(family_!=address(0) && familyleader_!=address(0)){
+    //     if(tribe_!=address(0) && familyleader_!=address(0)){
 
-          IERC1155(NFT).safeTransferFrom(address(this),family_, tokenout_, familyfee_, '');
-          require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
+    //       IERC1155(NFT).safeTransferFrom(address(this),tribe_, tokenout_, familyfee_, '');
+    //       require(checkSuccess(), 'error burning half of swap');///burn half of swapped ferror
 
-        }
-      }
+    //     }
+    //   }
       IERC1155(NFT).safeTransferFrom(address(this), _burn, tokenin_, sellamount_.div(2), '');
       require(checkSuccess(), 'error burning tokens in');
 

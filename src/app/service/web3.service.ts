@@ -7,8 +7,13 @@ declare var Moralis:any;
 declare var Web3:any;
 declare var $: any;
 
+const ABIBANK = require('../contracts/abi/bank.json');
 const ABIWALLETS = require('../contracts/abi/wallets.json');
+const ABINFT = require('../contracts/abi/nft.json');
+
 const WALLETS = environment.WALLETS;
+const BANK = environment.BANK;
+const NFT = environment.NFT;
 const CHAIN = environment.CHAIN;
 
 // import moment from 'moment';
@@ -127,6 +132,151 @@ public SETUSERNEWWALLET(user_:any, name_:any): Promise<any> {
           from:user_,
           to: WALLETS,
           gas: 3000000,
+          data:encodedFunction
+        }).on('transactionHash',(hash:any)=>{
+
+
+          }).on('receipt',(receipt:any)=>{
+
+            resolve({ success: true, msg: receipt });
+
+          }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+          //console.log(confirmationNumber, receipt)
+          }).on('error', console.error);
+
+      } catch (error) {
+
+      }
+    })
+}
+
+public SETCOLLECTION(user_:any, image_:any, title_:any, desc_:any, category_:any): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        await this.SETWEB3();
+        const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+          name: "setcollection",
+          type: "function",
+          inputs: [{
+            type: 'string',
+            name: 'title_'
+          },{
+            type: 'string',
+            name: 'details_'
+          },{
+            type: 'string',
+            name: 'image_'
+          },{
+            type: 'uint256',
+            name: 'category_'
+          }]
+        }, [title_.toString(), desc_.toString(),image_.toString(),category_])
+        const txt = await this.web3.eth.sendTransaction({
+          from:user_,
+          to: NFT,
+          gas: 3000000,
+          data:encodedFunction
+        }).on('transactionHash',(hash:any)=>{
+
+
+          }).on('receipt',(receipt:any)=>{
+
+            resolve({ success: true, msg: receipt });
+
+          }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+          //console.log(confirmationNumber, receipt)
+          }).on('error', console.error);
+
+      } catch (error) {
+
+      }
+    })
+}
+
+public GETUSERCOLLECTIONS(user_:any): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+          const options = {
+          chain: CHAIN,
+          address: NFT,
+          function_name: "getcollections",
+          abi: ABINFT,
+          params: { user_: user_ },
+        };
+
+        const result = await Moralis.Web3API.native.runContractFunction(options);
+        // console.log(result);
+        resolve(result);
+
+      } catch (error) {
+
+      }
+    })
+}
+
+public GETCOLLECTION(collection_:any): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+          const options = {
+          chain: CHAIN,
+          address: NFT,
+          function_name: "getcollection",
+          abi: ABINFT,
+          params: { collectionid_: collection_ },
+        };
+
+        const result = await Moralis.Web3API.native.runContractFunction(options);
+        console.log(result);
+        resolve(result);
+
+      } catch (error) {
+
+      }
+    })
+}
+
+public SETMINT(user_:any, image_:any, title_:any, desc_:any, prints_:any, payto_:any,royalty_:any,ipfs_:any, redeems_:any, category_:any): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        await this.SETWEB3();
+        const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+          name: "setcollection",
+          type: "function",
+          inputs: [{
+            type: 'bytes',
+            name: 'data_'
+          },{
+            type: 'string',
+            name: 'ipfs_'
+          },{
+            type: 'uint256',
+            name: 'collection_'
+          },{
+            type: 'uint256',
+            name: 'royalty_'
+          },{
+            type: 'uint256',
+            name: 'prints_'
+          },{
+            type: 'address',
+            name: 'payto_'
+          },{
+            type: 'uint256',
+            name: 'redeems_'
+          },{
+            type: 'uint256',
+            name: 'category_'
+          }]
+
+        }, [image_, title_.toString(),desc_.toString(),prints_,payto_, royalty_,ipfs_,redeems_,category_])
+        const txt = await this.web3.eth.sendTransaction({
+          from:user_,
+          to: NFT,
+          gas: 6000000,
           data:encodedFunction
         }).on('transactionHash',(hash:any)=>{
 
