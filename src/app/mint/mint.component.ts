@@ -27,6 +27,7 @@ export class MintComponent implements OnInit {
   _collectionimage:any;
   _collectionimagename:any;
   _collectionid:any;
+  _collectiontitle:any;
 
   _collections:any;
 
@@ -107,9 +108,11 @@ export class MintComponent implements OnInit {
     })
 
   }
-  async setcollection(collectionid_:any) {
+  async setcollection(collectionid_:any, collectiontitle_:any) {
+
     this._collectionid = collectionid_;
-    console.log(this._collectionid)
+    this._collectiontitle = collectiontitle_;
+    // console.log(this._collectionid)
   }
   async getuserens(){
 

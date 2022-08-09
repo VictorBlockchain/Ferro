@@ -1,12 +1,12 @@
 <div class="breadcrumb-wrapper">
       <div class="container">
         <div class="breadcrumb-content">
-          <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="_collectionid">New Mint</h2>
+          <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="_collectionid">New Mint <span *ngIf="_collectiontitle">to {{_collectiontitle}} <small>collection</small></span></h2>
           <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && !_showcreatecollection">Choose Collection</h2>
           <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && _showcreatecollection">Create Collection</h2>
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb justify-content-center">
-              <li class="breadcrumb-item"><a href="javascript: void(0)" routerLink="/home" data-aos-duration="750" data-aos-delay="600">Home</a></li>
+              <li class="breadcrumb-item"><a href="javascript: void(0)" data-aos-duration="750" data-aos-delay="600" *ngIf="_collectionid && !_showcreatecollection" (click)="_showcreatecollection=false; _collectionid=null">Collections</a></li>
               <li class="breadcrumb-item active" aria-current="page" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && !_showcreatecollection">New Mint</li>
               <li class="breadcrumb-item active" aria-current="page" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && _showcreatecollection" (click)="_showcreatecollection = false">Back</li>
             </ol>
@@ -25,7 +25,7 @@
               <!-- Tab Pane-->
               <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab--1">
                 <div class="row">
-                  <div class="col-12 col-sm-8 col-lg-8">
+                  <div class="col-12 col-sm-8 col-lg-8 create-new-form">
                     <div class="card">
                       <div class="card-body p-4 p-sm-5">
                         <form [formGroup]="_collection">
@@ -95,22 +95,16 @@
       <div class="container">
         <div class="row g-4 justify-content-center" *ngIf="_collections && _collections.length>0">
           <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4" *ngFor="let data of _collections">
-            <!-- Single Card -->
-            <div class="nft-card card seller-card shadow-sm">
-              <div class="card-body" (click)="setcollection(data[0])">
-                <div class="row align-items-center g-3">
-                  <div class="col-4">
-                    <div class="img-wrap"><img src="{{data[3]}}" alt="">
-                      <div class="badge bg-danger position-absolute px-2 py-1">#{{data[0]}}</div>
-                    </div>
-                  </div>
+            <div class="catagory-card card shadow-sm" (click)="setcollection(data[0],data[1])">
+              <div class="card-body">
+                <div class="row g-1">
+                  <div class="col-12"><img class="rounded" src="{{data[3]}}" alt=""></div>
+                </div>
+                <div class="row mt-3">
                   <div class="col-8">
-                    <div class="name-author">{{data[1]}}
-                      <div class="price-bid d-flex align-items-center mt-3">
-                        <p class="mb-0 lh-1 d-flex align-items-center fz-14">{{data[6].length}} Items</p>
-                      </div>
-                    </div>
+                    <h5 class="mb-0">{{data[1]}}</h5>
                   </div>
+                  <div class="col-4 text-end"><a class="btn btn-minimal hover-primary" href="#">{{data[6].length}} <small> items</small></a></div>
                 </div>
               </div>
             </div>
@@ -142,7 +136,7 @@
                   <div class="col-12">
                     <div class="form-group mb-4">
                       <label class="mb-2 fz-16" for="formFileMultiple">Upload Files</label>
-                      <input class="form-control bg-transparent" id="formFileMultiple" type="file" multiple="">
+                      <input class="form-control bg-transparent" id="formFileMultiple" type="file" multiple="" (change)="onCheckboxChange($event,1)">
                     </div>
                   </div>
                   <div class="col-12">
@@ -163,12 +157,6 @@
                     <div class="form-group mb-4">
                       <label class="mb-2 fz-16" for="description">Description</label>
                       <input class="form-control" type="text" placeholder="Write short description" formControlName="desc">
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group mb-4">
-                      <label class="mb-2 fz-16" for="price">Price</label>
-                      <input class="form-control" type="number" placeholder="0.324 ETH" formControlName="price">
                     </div>
                   </div>
 
@@ -207,7 +195,7 @@
             <!-- Preview Card -->
             <div class="nft-card card shadow-sm">
               <div class="card-body">
-                <div class="img-wrap"><img src="assets/img/bg-img/17.jpeg" alt="">
+                <div class="img-wrap"><img src="{{_nftimage || 'assets/img/bg-img/17.jpeg'}}" alt="">
                   <!-- Badge -->
                   <div class="badge bg-dark position-absolute"><img src="assets/img/core-img/fire.png" alt="">Hot bid</div>
                 </div>
