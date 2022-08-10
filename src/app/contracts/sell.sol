@@ -807,12 +807,13 @@ abstract contract ERC1155Burnable is ERC1155 {
         _burnBatch(account, ids, values);
     }
 }
-interface i368{
+interface i369{
 
   function ISSUENEWMINT(address to_, uint256 amount_, uint256 tokenid_) external returns (bool);
+  function GETTRIBE(address user_) external returns (address, address);
 
 }
-contract TELLS is ERC721Holder, ERC1155Holder {
+contract NFT_TELLS is ERC721Holder, ERC1155Holder {
 
     using SafeERC20 for IERC20;
     using Address for address;
@@ -847,6 +848,7 @@ contract TELLS is ERC721Holder, ERC1155Holder {
     bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
     bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
     address public _ens = 0x000000000000000000000000000000000000dEaD;
+    address public WETH = 0x000000000000000000000000000000000000dEaD;
     address public NFT;
     address public WALLETS;
     address public BANK;
@@ -909,7 +911,7 @@ contract TELLS is ERC721Holder, ERC1155Holder {
        _tellid2tell[_tellid] = save_;
        _teller2tells[msg.sender].push(_tellid);
        _tell2index[_tellid] = _teller2tells[msg.sender].length - 1;
-       _nft2wallet[nftid_] = nft2wallet_;
+       _nft2wallet[nftid_] = nftwallet_;
 
        if(nftcontract_ == _ens){
 
@@ -918,7 +920,7 @@ contract TELLS is ERC721Holder, ERC1155Holder {
 
        }else{
 
-         _activenftells.push(_tellid);
+         _activenfttells.push(_tellid);
          _activetell2index[_tellid] = _activenfttells.length - 1;
 
        }
@@ -1108,7 +1110,7 @@ contract TELLS is ERC721Holder, ERC1155Holder {
 
      }
 
-     function checkSuccess()
+     function checksuccess()
          private pure
          returns (bool)
        {
