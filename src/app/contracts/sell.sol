@@ -809,6 +809,7 @@ abstract contract ERC1155Burnable is ERC1155 {
 }
 
 contract TELLS is ERC721Holder, ERC1155Holder {
+
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
@@ -816,57 +817,146 @@ contract TELLS is ERC721Holder, ERC1155Holder {
     struct TELLS{
 
       uint256 reserve;
+      uint256 buyprice;
       uint256[] bids;
-      uint256 end;
+      uint256 endtime;
       address seller;
       address[] bidders;
-      address vault;
-      bool active;
-      uint256 type_;
-      address controller; //ens contract or nft contract address
-      uint256 itemid;
+      uint256 nftcategory;
+      address nftcontroller; //ens contract or nft contract address
+      uint256 nftid;
+      uint256 prints;
 
     }
 
     TELLS[] public _tells;
-    address[] public _activenfttells;
-    address[] public _activeenstells;
-    mapping(address=>uint256) public _activetell2index;
+    uint256[] public _activenfttells;
+    uint256[] public _activeenstells;
+    mapping(uint256=>uint256) public _activetell2index;
 
-    mapping(address =>TELLS) public _vault2tell;
-    mapping(address=>uint256) public _vault2reflections;
-    mapping(address=>uint256) public _vault2lockamount;
-    mapping(address=>mapping(uint256 =>TELLS)) public _nftcontract2nftid2tell;
-    mapping(address=>uint256[]) public _nftcontract2nfts;
-    mapping(address=>mapping(uint256=>address)) public _nftcontract2nftid2vault;
-    mapping(uint256 =>TELLS) public _ens2tell;
-
-    address[] _sellers;
-    mapping(address=>uint256) public _seller2index;
-    mapping(address=>uint256) public _seller2salescount;
-
-    address[] public _nftvaults;
-    address[] public _ensvaults;
-    mapping(address=>uint256) public _vault2index;
-    mapping(address=>address) public _vault2seller;
-    mapping(uint256=>address) public _ens2vault;
-    mapping(address=>address) public _vault2nftcontract;
-    mapping(address=>mapping(address=>uint256)) public _vault2nftcontract2nftid;
-
-    mapping(address=>mapping(address => bool)) public _bidder2vault2bidaccepted;
-    mapping(address=>address[]) public _bidder2vaultsbidded;
-    mapping(address=>mapping(address=>uint256)) private _bidder2vaultsbidamount;
-    mapping(address=>mapping(address=>uint256)) public _bidder2vault2reflections;
+    mapping(uint256=>TELLS) public _tellid2tell;
+    mapping(address=>uint256[]) public _teller2tells;
+    mapping(uint256=>uint256) private _tell2index;
+    mapping(address=>bool) private _isadmin;
 
     bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
     bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
-    address public BRIDGE;
+    address public _ens = 0x000000000000000000000000000000000000dEaD;
+    address public NFT;
+    address public WALLETS;
+    address public BANK;
+    uint256 public _tellid;
 
-     constructor(address bridge_) {
+     constructor(address bank_, address wallets_, address nft_) {
 
-         BRIDGE = bridge_;
+         NFT = nft_;
+         WALLETS = wallets_;
+         BANK = bank_;
+         _tellid = 0;
+
      }
 
+     function createtell(address nftcontract_, uint256 nftid_, uint256 nftcategory_, uint256 prints_, uint256 reserveprice_, uint256 buyprice_) public {
+
+       if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+
+           IERC721 nft = IERC721(nftcontract_);
+           require(nft.ownerOf(nftid_) == msg.sender, "you do not have this nft");
+
+           require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
+           nft.safeTransferFrom(msg.sender, address(this), nftid_);
+           require(checksuccess(), 'error transfering nft');
+
+       } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+
+           IERC1155 nft = IERC1155(nftcontract_);
+           require(nft.balanceOf(msg.sender, nftid_) >= prints_, "you have nnot enough");
+           nft.safeTransferFrom(msg.sender, address(this), nftid_, prints_, bytes(""));
+           IERC1155Receiver(address(this)).onERC1155Received(nftcontract_,msg.sender,nftid_,prints_,'');
+
+
+       } else {
+
+           revert("invalid nft address");
+       }
+
+       _tellid = _tellid + 1;
+
+       TELLS memory save_ = TELLS({
+
+         reserve: reserveprice_,
+         buyprice: buyprice_,
+         bids:  new uint256[](0),
+         endtime: block.timestamp + 7 days,
+         seller: msg.sender,
+         bidders: new address[](0),
+         nftcategory: nftcategory_,
+         nftcontroller: nftcontract_,
+         nftid: nftid_,
+         prints: prints_
+
+       });
+
+       _tells.push(save_);
+       _tellid2tell[_tellid] = save_;
+       _teller2tells[msg.sender].push(_tellid);
+       _tell2index[_tellid] = _teller2tells[msg.sender].length - 1;
+
+       if(nftcontract_ == _ens){
+
+         _activeenstells.push(_tellid);
+         _activetell2index[_tellid] = _activeenstells.length - 1;
+
+       }else{
+
+         _activenftells.push(_tellid);
+         _activetell2index[_tellid] = _activenfttells.length - 1;
+
+       }
+
+     }
+
+     function canceltell(uint256 tellid_) public {
+
+       require(_tellid2tell[tellid_].seller == msg.sender || _isadmin[msg.sender], 'not your tell');
+       require(_activetell2index[tellid_]>0 , 'tell is not active');
+       require(_tellid2tell[tellid_].bidders.length<1, 'tell has bids');
+
+       address nftcontract_ = _tellid2tell[tellid_].nftcontroller;
+       uint256 nftid_ = _tellid2tell[tellid_].nftid;
+
+       if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+
+           IERC721 nft = IERC721(nftcontract_);
+           require(nft.ownerOf(nftid_) == address(this), "nft not in this contract");
+
+           nft.safeTransferFrom(address(this), _tellid2tell[tellid_].seller, nftid_);
+           require(checksuccess(), 'error transfering nft');
+
+       } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+
+           IERC1155 nft = IERC1155(nftcontract_);
+           require(nft.balanceOf(address(this), nftid_) >= _tellid2tell[tellid_].prints, "not enough prints in contract");
+           nft.safeTransferFrom(address(this), _tellid2tell[tellid_].seller , nftid_, _tellid2tell[tellid_].prints, bytes(""));
+
+       } else {
+
+           revert("invalid nft address");
+       }
+
+       if(_activenfttells[_activetell2index[tellid_]]>0){
+
+          delete _activenfttells[_activetell2index[tellid_]];
+
+       }else{
+
+         delete _activeenstells[_activetell2index[tellid_]];
+
+       }
+
+        delete _teller2tells[_tellid2tell[tellid_].seller ][_tell2index[tellid_]];
+
+     }
 
      function checkSuccess()
          private pure
