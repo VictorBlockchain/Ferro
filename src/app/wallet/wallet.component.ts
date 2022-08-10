@@ -26,6 +26,8 @@ export class WalletComponent implements OnInit,AfterViewInit {
   _message:any;
   _messagetype:any;
   _wallets:any;
+  _usernfts:any;
+  _nfts:any;
 
   constructor(private formBuilder: FormBuilder,private service_: SERVICE,private zone: NgZone, private cd: ChangeDetectorRef,private route: ActivatedRoute,private router: Router) {
 
@@ -70,10 +72,32 @@ export class WalletComponent implements OnInit,AfterViewInit {
     this._service.GETUSERWALLET(this._user)
     .then((res:any)=>{
       this._wallets = res[1];
+      this.getnfts();
       //console.log(res);
     })
   }
 
+  async getnfts(){
+
+    const options = {
+      chain: environment.CHAIN,
+      address: this._user,
+      token_address: environment.NFT,
+    };
+    const nfts_ = await Moralis.Web3API.account.getNFTsForContract(options);
+    this._usernfts = []
+    for (let i = 0; i < nfts_.result.length; i++) {
+      const element = nfts_.result[i];
+      let url = element.token_uri;
+
+      url = url.replace('https://ipfs.moralis.io:2053/ipfs/', 'https://gateway.moralisipfs.com/ipfs/');
+      nfts_.result[i].token_uri = url;
+      this._usernfts.push(element);
+      let response = await fetch(nfts_.result[i].token_uri.image );
+      console.log(response);
+    }
+    // console.log(this._usernfts);
+  }
   async editprofile(){
 
     let pass = true;
