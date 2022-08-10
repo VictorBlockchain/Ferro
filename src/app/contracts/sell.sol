@@ -807,7 +807,11 @@ abstract contract ERC1155Burnable is ERC1155 {
         _burnBatch(account, ids, values);
     }
 }
+interface i368{
 
+  function ISSUENEWMINT(address to_, uint256 amount_, uint256 tokenid_) external returns (bool);
+
+}
 contract TELLS is ERC721Holder, ERC1155Holder {
 
     using SafeERC20 for IERC20;
@@ -838,6 +842,7 @@ contract TELLS is ERC721Holder, ERC1155Holder {
     mapping(address=>uint256[]) public _teller2tells;
     mapping(uint256=>uint256) private _tell2index;
     mapping(address=>bool) private _isadmin;
+    mapping(uint256=>address) private _nft2wallet;
 
     bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
     bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
@@ -845,18 +850,21 @@ contract TELLS is ERC721Holder, ERC1155Holder {
     address public NFT;
     address public WALLETS;
     address public BANK;
+    address public TRIBE;
     uint256 public _tellid;
 
-     constructor(address bank_, address wallets_, address nft_) {
+     constructor(address bank_, address wallets_, address nft_, address tribe_) {
 
          NFT = nft_;
          WALLETS = wallets_;
          BANK = bank_;
+         TRIBE = tribe_;
          _tellid = 0;
 
      }
+     receive () external payable {}
 
-     function createtell(address nftcontract_, uint256 nftid_, uint256 nftcategory_, uint256 prints_, uint256 reserveprice_, uint256 buyprice_) public {
+     function createtell(address nftcontract_, uint256 nftid_, uint256 nftcategory_, uint256 prints_, uint256 reserveprice_, uint256 buyprice_, address nftwallet_) public {
 
        if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
 
@@ -901,6 +909,7 @@ contract TELLS is ERC721Holder, ERC1155Holder {
        _tellid2tell[_tellid] = save_;
        _teller2tells[msg.sender].push(_tellid);
        _tell2index[_tellid] = _teller2tells[msg.sender].length - 1;
+       _nft2wallet[nftid_] = nft2wallet_;
 
        if(nftcontract_ == _ens){
 
@@ -955,6 +964,147 @@ contract TELLS is ERC721Holder, ERC1155Holder {
        }
 
         delete _teller2tells[_tellid2tell[tellid_].seller ][_tell2index[tellid_]];
+
+     }
+
+     function bid(uint256 tellid_, uint256 bidamount_) public {
+
+       require(_activetell2index[tellid_]>0 , 'tell is not active');
+       require(_tellid2tell[tellid_].seller == msg.sender, 'no bidding on your tell');
+       uint256 highestbidindex_ = _tellid2tell[tellid_].bids.length - 1;
+       uint256 highestbid_ = _tellid2tell[tellid_].bids[highestbidindex_];
+
+       uint256 highestbidderindex_ = _tellid2tell[tellid_].bidders.length - 1;
+       address highestbidder_ = _tellid2tell[tellid_].bidders[highestbidderindex_];
+       address nftcontract_ = _tellid2tell[tellid_].nftcontroller;
+       uint256 nftid_ = _tellid2tell[tellid_].nftid;
+
+       if(_tellid2tell[tellid_].bidders.length>0){
+
+         require(bidamount_ > highestbid_, 'bid too low');
+
+       }else{
+
+         require(bidamount_ > _tellid2tell[tellid_].reserve, 'bid too low');
+
+       }
+
+       if(bidamount_ >= _tellid2tell[tellid_].buyprice){
+         ///transfer nft to buyer
+
+         if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+
+             IERC721 nft = IERC721(nftcontract_);
+             require(nft.ownerOf(nftid_) == address(this), "nft not in this contract");
+
+             nft.safeTransferFrom(address(this), msg.sender, nftid_);
+             require(checksuccess(), 'error transfering nft');
+
+         } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+
+             IERC1155 nft = IERC1155(nftcontract_);
+             require(nft.balanceOf(address(this), nftid_) > 0, "not enough prints in contract");
+             nft.safeTransferFrom(address(this), msg.sender , nftid_, 1, bytes(""));
+
+         } else {
+
+             revert("invalid nft address");
+         }
+       }
+
+       //refund previous bidder
+       if(highestbidder_!=address(0)){
+
+         IERC20(WETH).transfer(highestbidder_, highestbid_);
+         require(checksuccess(), 'error refunding bid');
+
+       }
+       //register bid
+       IERC20(WETH).safeTransferFrom(msg.sender,address(this),bidamount_);
+       require(checksuccess(), 'error paying bid');
+
+       uint256 fee_ = bidamount_.mul(2).div(100);
+       bidamount_ = bidamount_.sub(fee_);
+
+       _tellid2tell[tellid_].bids.push(bidamount_);
+       _tellid2tell[tellid_].bidders.push(msg.sender);
+       // pay 1% to nft and bank       //pay 1% to nft wallet if exists
+       if(_nft2wallet[nftid_]!=address(0)){
+
+         IERC20(WETH).transfer(_nft2wallet[nftid_], fee_.div(2));
+         require(checksuccess(), 'error paying nft wallet');
+         IERC20(WETH).transfer(BANK, fee_.div(2));
+         require(checksuccess(), 'error paying bank');
+       }else{
+         IERC20(WETH).transfer(BANK, fee_);
+         require(checksuccess(), 'error paying bank');
+       }
+       //mint ferro to tribe
+       (address tribe_, address tribeleader_) = i369(TRIBE).GETTRIBE(msg.sender);
+       if(tribe_!=address(0)){
+
+         i369(NFT).ISSUENEWMINT(tribe_, fee_.div(2).div(3), 1);
+         require(checksuccess(), 'error minting to tribe');
+
+         i369(NFT).ISSUENEWMINT(tribeleader_, fee_.div(2).div(3), 1);
+         require(checksuccess(), 'error minting to tribe leader');
+
+         i369(NFT).ISSUENEWMINT(BANK, fee_.div(2).div(3), 1);
+         require(checksuccess(), 'error minting to tribe leader');
+
+       }else{
+
+         i369(NFT).ISSUENEWMINT(BANK, fee_.div(2), 1);
+         require(checksuccess(), 'error minting to tribe leader');
+
+       }
+     }
+
+     function bidaccept(uint256 tellid_) public {
+
+       require(_activetell2index[tellid_]>0 , 'tell is not active');
+       uint256 highestbidderindex_ = _tellid2tell[tellid_].bidders.length - 1;
+       address highestbidder_ = _tellid2tell[tellid_].bidders[highestbidderindex_];
+
+       uint256 highestbidindex_ = _tellid2tell[tellid_].bids.length - 1;
+       uint256 highestbid_ = _tellid2tell[tellid_].bids[highestbidindex_];
+
+       address nftcontract_ = _tellid2tell[tellid_].nftcontroller;
+       uint256 nftid_ = _tellid2tell[tellid_].nftid;
+
+       if(block.timestamp < _tellid2tell[tellid_].endtime){
+
+         require(_tellid2tell[tellid_].seller == msg.sender, 'not your tell');
+
+       }else{
+
+         require(highestbidder_ == msg.sender, 'not are not the highest bidder');
+
+       }
+
+       if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+
+           IERC721 nft = IERC721(nftcontract_);
+           require(nft.ownerOf(nftid_) == address(this), "nft not in this contract");
+
+           nft.safeTransferFrom(address(this), highestbidder_, nftid_);
+           require(checksuccess(), 'error transfering nft');
+
+       } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+
+           IERC1155 nft = IERC1155(nftcontract_);
+           require(nft.balanceOf(address(this), nftid_) > 0, "not enough prints in contract");
+           nft.safeTransferFrom(address(this), highestbidder_ , nftid_, 1, bytes(""));
+
+       } else {
+
+           revert("invalid nft address");
+       }
+       // pay seller
+       IERC20(WETH).safeTransfer(_tellid2tell[tellid_].seller,highestbid_);
+       require(checksuccess(), 'error paying bid');
+
+       // transfer nft to highestbidder_
 
      }
 
