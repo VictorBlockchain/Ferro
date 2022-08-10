@@ -5,6 +5,7 @@ import { finalize } from 'rxjs/operators';
 import { SERVICE } from '../service/web3.service';
 import { environment } from '../../environments/environment';
 declare var Moralis:any;
+declare var axios:any;
 declare var $: any;
 const serverUrl = environment.moralisSerer;
 const appId = environment.moralisKey;
@@ -91,12 +92,14 @@ export class WalletComponent implements OnInit,AfterViewInit {
       let url = element.token_uri;
 
       url = url.replace('https://ipfs.moralis.io:2053/ipfs/', 'https://gateway.moralisipfs.com/ipfs/');
-      nfts_.result[i].token_uri = url;
+      // nfts_.result[i].token_uri = url;
+      let response = await axios.get(url);
+      nfts_.result[i].ipfs = response.data;
       this._usernfts.push(element);
-      let response = await fetch(nfts_.result[i].token_uri.image );
-      console.log(response);
+      // let response = await axios.get(url);
+      // console.log(response.data);
     }
-    // console.log(this._usernfts);
+    console.log(this._usernfts);
   }
   async editprofile(){
 
