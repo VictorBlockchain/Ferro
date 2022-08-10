@@ -6,9 +6,9 @@
           <h2 class="breadcrumb-title" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && _showcreatecollection">Create Collection</h2>
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb justify-content-center">
-              <li class="breadcrumb-item"><a href="javascript: void(0)" data-aos-duration="750" data-aos-delay="600" *ngIf="_collectionid && !_showcreatecollection" (click)="_showcreatecollection=false; _collectionid=null">Collections</a></li>
-              <li class="breadcrumb-item active" aria-current="page" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && !_showcreatecollection">New Mint</li>
-              <li class="breadcrumb-item active" aria-current="page" data-aos-duration="750" data-aos-delay="600" *ngIf="!_collectionid && _showcreatecollection" (click)="_showcreatecollection = false">Back</li>
+              <li class="breadcrumb-item" *ngIf="_collectionid && !_showcreatecollection"><a href="javascript: void(0)" data-aos-duration="750" data-aos-delay="600" (click)="_showcreatecollection=false; _collectionid=null">Collections</a></li>
+              <li class="breadcrumb-item" *ngIf="!_collectionid && !_showcreatecollection"><a href="javascript: void(0)" aria-current="page" data-aos-duration="750" data-aos-delay="600">New Mint</a></li>
+              <li class="breadcrumb-item" *ngIf="!_collectionid && _showcreatecollection"> <a href="javascript: void(0)" aria-current="page" data-aos-duration="750" data-aos-delay="600" (click)="_showcreatecollection = false">Back</a></li>
             </ol>
           </nav>
         </div>
@@ -47,13 +47,19 @@
                               <textarea class="form-control  bg-gray border-0" cols="10" rows="5" placeholder="Short Description" formControlName="desc"></textarea>
                             </div>
                             <div class="col-6 form-group mb-4">
+                              <label class="mb-2 fz-16" for="formFileMultiple">Upload Image</label>
                               <input class="form-control bg-transparent btn btn-dark w-100 rounded-pill" id="formFileMultiple" type="file" multiple="" (change)="upload($event,2)">
                               <!-- <button class="btn btn-dark w-100 rounded-pill" (click)="upload($event, 2)"><i class="bi bi-sd-card-fill me-1"></i>Upload Image</button> -->
                             </div>
 
-                            <div class="col-6">
+                            <div class="col-6" *ngIf="_collectioncategory==2 || _collectioncategory==3">
+                              <label class="mb-2 fz-16" for="formFileMultiple">Upload Media Files</label>
+                              <input class="form-control bg-transparent btn btn-secondary w-100 rounded-pill" id="formFileMultiple" type="file" multiple="" (change)="upload($event,3)">
+                            </div>
+                            <div class="col-12">
                               <button class="btn btn-primary w-100 rounded-pill" (click)="createcollection()"><i class="bi bi-sd-card-fill me-1"></i>Create Collection</button>
                             </div>
+                            <p class="text-center" *ngIf="_message">{{_message}}</p>
                           </div>
                         </form>
                       </div>
@@ -136,7 +142,7 @@
                   <div class="col-12">
                     <div class="form-group mb-4">
                       <label class="mb-2 fz-16" for="formFileMultiple">Upload Files</label>
-                      <input class="form-control bg-transparent" id="formFileMultiple" type="file" multiple="" (change)="onCheckboxChange($event,1)">
+                      <input class="form-control bg-transparent" id="formFileMultiple" type="file" multiple="" (change)="upload($event,1)">
                     </div>
                   </div>
                   <div class="col-12">
@@ -166,10 +172,16 @@
                       <input class="form-control" type="number" placeholder="5%" formControlName="royalty">
                     </div>
                   </div>
-                  <div class="col-12 col-md-6">
+                  <div class="col-12 col-md-6" *ngIf="_nftcategory!=1">
                     <div class="form-group mb-4">
                       <label class="mb-2 fz-16" for="prints">No of prints</label>
                       <input class="form-control"  type="number" placeholder="1" formControlName="prints">
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6" *ngIf="_nftcategory==3">
+                    <div class="form-group mb-4">
+                      <label class="mb-2 fz-16" for="prints">Coupon Redeems</label>
+                      <input class="form-control"  type="number" placeholder="1" formControlName="redeems">
                     </div>
                   </div>
                   <div class="col-12 col-md-6">
@@ -187,6 +199,8 @@
                   <div class="col-12 col-md-4">
                     <button class="btn btn-primary rounded-pill w-100" (click)="createmint()">Create</button>
                   </div>
+                  <p class="text-center" *ngIf="_message">{{_message}}</p>
+
                 </div>
               </form>
             </div>

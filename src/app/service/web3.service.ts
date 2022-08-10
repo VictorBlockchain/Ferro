@@ -150,9 +150,10 @@ public SETUSERNEWWALLET(user_:any, name_:any): Promise<any> {
     })
 }
 
-public SETCOLLECTION(user_:any, image_:any, title_:any, desc_:any, category_:any): Promise<any> {
+public SETCOLLECTION(user_:any, image_:any, title_:any, desc_:any, category_:any, media_:any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
+        // console.log('yep its working' +  media_);
 
         await this.SETWEB3();
         const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
@@ -168,10 +169,13 @@ public SETCOLLECTION(user_:any, image_:any, title_:any, desc_:any, category_:any
             type: 'string',
             name: 'image_'
           },{
+            type: 'string',
+            name: 'media_'
+          },{
             type: 'uint256',
             name: 'category_'
           }]
-        }, [title_.toString(), desc_.toString(),image_.toString(),category_])
+        }, [title_.toString(), desc_.toString(),image_.toString(),media_.toString(),category_])
         const txt = await this.web3.eth.sendTransaction({
           from:user_,
           to: NFT,
@@ -238,13 +242,14 @@ public GETCOLLECTION(collection_:any): Promise<string> {
     })
 }
 
-public SETMINT(user_:any, image_:any, title_:any, desc_:any, prints_:any, payto_:any,royalty_:any,ipfs_:any, redeems_:any, category_:any): Promise<any> {
+public SETMINT(user_:any, uri_:any, ipfs_:any, collectionid_:any, royalty_:any, prints_:any, payto_:any,redeems_:any,category_:any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
+        console.log(uri_);
 
         await this.SETWEB3();
         const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
-          name: "setcollection",
+          name: "setnftmint",
           type: "function",
           inputs: [{
             type: 'bytes',
@@ -272,7 +277,7 @@ public SETMINT(user_:any, image_:any, title_:any, desc_:any, prints_:any, payto_
             name: 'category_'
           }]
 
-        }, [image_, title_.toString(),desc_.toString(),prints_,payto_, royalty_,ipfs_,redeems_,category_])
+        }, [this.web3.utils.asciiToHex(uri_),ipfs_.toString(), collectionid_,royalty_,prints_,payto_,redeems_,category_])
         const txt = await this.web3.eth.sendTransaction({
           from:user_,
           to: NFT,

@@ -49,6 +49,9 @@ export class MintComponent implements OnInit {
   _showcreatecollection:any;
   _showcreatenft:any;
 
+  _message:any;
+  _messagetype:any;
+
   _nftoptions: any = [
     { id: 1, name: 'Single Mint' },
     { id: 2, name: 'Multiple Prints' },
@@ -193,9 +196,20 @@ async createcollection(){
     pass = false;
 
   }
-  if(pass){
+  if((this._collectioncategory == 2 || this._collectioncategory == 3) && !this._mediaurl && pass){
 
-    this._service.SETCOLLECTION(this._user,this._collectionimage,this._collection.controls.title.value,this._collection.controls.desc.value, this._collectioncategory)
+    this.pop('error', 'whats the music or video to upload?');
+    pass = false;
+
+  }
+  if(pass){
+    // console.log("testing");
+    if(!this._mediaurl){
+      this._mediaurl= 'none';
+    }else{
+      // console.log(this._mediaurl)
+    }
+    this._service.SETCOLLECTION(this._user,this._collectionimage,this._collection.controls.title.value,this._collection.controls.desc.value, this._collectioncategory, this._mediaurl)
     .then((res:any)=>{
 
     })
@@ -205,6 +219,7 @@ async createcollection(){
 async createmint(){
 
     let payto_:any;
+    let redeems:any;
     let pass = true;
 
     if(!this._nftimage){
@@ -232,15 +247,9 @@ async createmint(){
 
     }
 
-    if(!this._mint.controls.prints.value && pass){
+    if(!this._mint.controls.prints.value && this._nftcategory!=1 && pass){
 
       this.pop('error', 'how many prints?');
-      pass = false;
-
-    }
-    if(!this._mint.controls.payaddress.value && pass){
-
-      this.pop('error', 'who do we pay to?');
       pass = false;
 
     }
@@ -251,11 +260,42 @@ async createmint(){
     }
     if(pass){
 
-      console.log('going..')
+      let prints;
       if(!payto_){
+        payto_ = this._user;
+      }else{
         payto_ = this._mint.controls.payaddress.value;
       }
-      this._service.createmint(this._user, this._nftimage, this._mint.controls.title.value, this._mint.controls.desc.value,  this._mint.controls.prints.value, payto_, this._mint.controls.royalty.value,this._mint.controls.redeems.value, this._nftcategory)
+      if(this._nftcategory == 1){
+        prints = 1;
+      }else{
+        prints = this._mint.controls.prints.value;
+      }
+      if(!this._mint.controls.redeems.value){
+        redeems = 0;
+      }else{
+        redeems = this._mint.controls.redeems.value;
+      }
+      let metaData:any = new Object();
+      metaData.title = this._mint.controls.title.value;
+      metaData.prints = prints;
+      metaData.story = this._mint.controls.desc.value;
+      metaData.royalty = this._mint.controls.royalty.value;
+      metaData.image = this._imageuri;
+      metaData.creator = this._user;
+      metaData.created = this.curday('/')
+      metaData.collection = this._collectionid;
+      metaData.wrappedTo = 0;
+      metaData.media = this._mediaurl;
+
+      const metaDataFile = new Moralis.File("metadata.json", {base64 : btoa(JSON.stringify(metaData))});
+      await metaDataFile.saveIPFS();
+      const metaDataURI = await metaDataFile.ipfs();
+      let ipfs_ = metaDataFile._ipfs;
+      // console.log(metaDataURI)
+      // console.log(this._user, this._nftimage, this._mint.controls.title.value, this._mint.controls.desc.value,  prints, payto_, this._mint.controls.royalty.value,  ipfs, this._mint.controls.redeems.value, this._nftcategory);
+
+      this._service.SETMINT(this._user, metaDataURI, ipfs_, this._collectionid, this._mint.controls.royalty.value, prints, payto_, redeems, this._nftcategory)
       .then((res:any)=>{
 
         if(res.success){
@@ -264,11 +304,23 @@ async createmint(){
           this.pop('error', res.message);
 
         }
-
       })
+
     }else{
-      console.log(this._mint.controls.royalty.value);
+      console.log('not working');
     }
+  }
+    private curday(sp:any){
+
+    let today:any = new Date();
+    let dd:any = today.getDate();
+    let mm:any = today.getMonth()+1; //As January is 0.
+    let yyyy:any = today.getFullYear();
+
+    if(dd<10) dd='0'+dd;
+    if(mm<10) mm='0'+mm;
+    return (mm+sp+dd+sp+yyyy);
+
   }
   async onCheckboxChange(e:any, type_:any) {
 
@@ -307,6 +359,11 @@ async createmint(){
     } else {
       title = 'Success!';
     }
+    this._message = message;
+    this._messagetype = title;
+    setTimeout(() => {
+      this._message = '';
+    }, 3000);
     //
     // Swal.fire({
     //   title: title,
@@ -327,6 +384,7 @@ async createmint(){
     prints: [''],
     payaddress: [''],
     terms: [''],
+    redeems:['']
 
   });
 

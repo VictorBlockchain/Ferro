@@ -768,14 +768,30 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     event newnftmint(
-        address _creator,
-        uint256 _nftid,
-        string _ipfs
+        address creator,
+        uint256 nftid,
+        string ipfs
+    );
+    event newcollection(
+        address creator,
+        uint256 collectionid
+      );
+    event newattribute(
+
+      uint256 tokenid,
+      string name,
+      string representation,
+      string category,
+      uint256 supply,
+      uint256 pricedto
+
     );
     event newtokenmint(
+
         uint256 tokenid,
         uint256 amount,
         address holder
+
     );
     struct COLLECTIONS{
 
@@ -783,6 +799,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
       string title;
       string details;
       string image;
+      string media;
       address creator;
       uint256 category;
       uint256[] nfts;
@@ -821,6 +838,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
      mapping(string=>ATTRIBUTES) public _attibutename2attribute;
      mapping(uint256=>NFTS) public _nft;
      mapping(uint256=>COLLECTIONS) public _collection;
+     mapping(uint256=> string[]) public _collection2mediaurl;
      mapping(uint256=>uint256) public _nft2collectionindex;
      mapping(address=>bool) public _isjordi;
      mapping(address=>bool) public _isdata;
@@ -829,6 +847,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
      mapping(address=>uint256[]) public _user2collections;
      mapping(address=>mapping(uint256=>uint256)) private _user2collections2index;
      mapping(string=>uint256[]) public _keyword2nft;
+
      uint256 public NFTID;
      uint256 public COLLECTIONID;
      address public NFTWRAPPER;
@@ -1020,7 +1039,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
         return true;
     }
 
-    function setcollection(string memory title_, string memory details_, string memory image_, uint256 category_) public {
+    function setcollection(string memory title_, string memory details_, string memory image_, string memory media_, uint256 category_) public {
 
       COLLECTIONID += 1;
       COLLECTIONS memory save_ = COLLECTIONS({
@@ -1028,6 +1047,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
         title:title_,
         details:details_,
         image: image_,
+        media: media_,
         creator: msg.sender,
         category: category_,
         nfts: new uint256[](0)
@@ -1036,6 +1056,7 @@ contract TELL_A_FRIEND_NFTS is Ownable, ERC1155, ERC1155Burnable, ERC1155Supply,
       _collections.push(save_);
       _user2collections[msg.sender].push(COLLECTIONID);
       _user2collections2index[msg.sender][COLLECTIONID] = _user2collections[msg.sender].length - 1;
+      emit newcollection(msg.sender, COLLECTIONID);
 
     }
 
@@ -1098,8 +1119,7 @@ function setnftmint(bytes memory data_, string memory ipfs_, uint256 collection_
       _collection[collection_].nfts.push(NFTID);
       _nft2collectionindex[NFTID] = _collection[collection_].nfts.length - 1;
       _mint(_collection[collection_].creator, NFTID, prints_, data_);
-
-     // emit newMint(msg.sender, NFTID, ipfs_);
+      emit newnftmint(msg.sender, NFTID, ipfs_);
 
     }
 
