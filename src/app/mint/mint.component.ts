@@ -364,13 +364,7 @@ async createmint(){
     setTimeout(() => {
       this._message = '';
     }, 3000);
-    //
-    // Swal.fire({
-    //   title: title,
-    //   text: message,
-    //   icon: type,
-    //   confirmButtonText: 'Close',
-    // });
+
   }
 
   createForm(){

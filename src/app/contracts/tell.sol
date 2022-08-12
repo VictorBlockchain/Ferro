@@ -809,461 +809,338 @@ abstract contract ERC1155Burnable is ERC1155 {
 }
 interface i369{
 
-    function GETCIRCULATINGSUPPLY(uint256 tokenid_) external pure returns(uint256);
-    function GETPRICEDTOSUPPLY(uint256 tokenid_) external pure returns(uint256, uint256, uint256, uint256, uint256);
-    function GETPRICEDTOSWAPSUPPLY(uint256 tokenin_, uint256 tokenout_) external view returns(uint256, uint256, uint256, uint256, uint256, uint256,uint256,uint256);
+  function ISSUENEWMINT(address to_, uint256 amount_, uint256 tokenid_) external returns (bool);
+  function GETTRIBE(address user_) external returns (address, address);
 
 }
-contract TRIBEWALLET is ERC721Holder, ERC1155Holder {
+
+contract NFT_TELLS is ERC721Holder, ERC1155Holder {
 
     using SafeERC20 for IERC20;
+    using Address for address;
     using SafeMath for uint256;
-    event deposit(
-        address sender,
-        uint256 amount,
-        address x0
-    );
-    event withdraw(
 
-        address receiver,
-        uint256 amount,
-        address x0
-    );
+    struct TELLS{
+
+      uint256 reserve;
+      uint256 buyprice;
+      uint256[] bids;
+      uint256 endtime;
+      address seller;
+      address[] bidders;
+      uint256 nftcategory;
+      address nftcontroller; //ens contract or nft contract address
+      uint256 nftid;
+      uint256 prints;
+
+    }
+
+    TELLS[] public _tells;
+    uint256[] public _activenfttells;
+    uint256[] public _activeenstells;
+    mapping(uint256=>uint256) public _activetell2index;
+
+    mapping(uint256=>TELLS) public _tellid2tell;
+    mapping(address=>uint256[]) public _teller2tells;
+    mapping(uint256=>uint256) private _tell2index;
+    mapping(address=>bool) private _isadmin;
+    mapping(uint256=>address) private _nft2wallet;
+
     bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
     bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
+    address public _ens = 0x000000000000000000000000000000000000dEaD;
+    address public WETH = 0x000000000000000000000000000000000000dEaD;
+    address public NFT;
+    address public WALLETS;
+    address public BANK;
+    address public TRIBE;
+    uint256 public _tellid;
 
-    constructor() {
-    }
+     constructor(address bank_, address wallets_, address nft_, address tribe_) {
 
-    function TAKETOKEN(address token_, uint256 amount_, address sendto_) public returns (bool){
+         NFT = nft_;
+         WALLETS = wallets_;
+         BANK = bank_;
+         TRIBE = tribe_;
+         _tellid = 0;
 
-      IERC20(token_).transfer(sendto_, amount_);
-      return true;
-    }
-    function TAKENFT(address nftcontract_, uint256 nftid_, uint256 amount_, address sendto_) public returns (bool) {
+     }
+     receive () external payable {}
 
-      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+     function createtell(address nftcontract_, uint256 nftid_, uint256 nftcategory_, uint256 prints_, uint256 reserveprice_, uint256 buyprice_, address nftwallet_) public {
 
-          IERC721 nft = IERC721(nftcontract_);
-          require(nft.ownerOf(nftid_) == address(this), "nft not in this contract");
+       if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
 
-          nft.safeTransferFrom(address(this), sendto_, nftid_);
-          require(checksuccess(), 'error transfering nft');
+           IERC721 nft = IERC721(nftcontract_);
+           require(nft.ownerOf(nftid_) == msg.sender, "you do not have this nft");
 
-      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+           require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
+           nft.safeTransferFrom(msg.sender, address(this), nftid_);
+           require(checksuccess(), 'error transfering nft');
 
-          IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(address(this), nftid_) > 0, "not enough prints in contract");
-          nft.safeTransferFrom(address(this), sendto_ , nftid_, 1, bytes(""));
+       } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
 
-      } else {
+           IERC1155 nft = IERC1155(nftcontract_);
+           require(nft.balanceOf(msg.sender, nftid_) >= prints_, "you have nnot enough");
+           nft.safeTransferFrom(msg.sender, address(this), nftid_, prints_, bytes(""));
+           IERC1155Receiver(address(this)).onERC1155Received(nftcontract_,msg.sender,nftid_,prints_,'');
 
-          revert("invalid nft address");
-      }
-      return true;
-    }
 
-contract NFTWALLET is ERC721Holder, ERC1155Holder {
+       } else {
 
-    using SafeERC20 for IERC20;
-    using SafeMath for uint256;
-    event deposit(
-        address sender,
-        uint256 amount,
-        address x0
-    );
-    event withdraw(
+           revert("invalid nft address");
+       }
 
-        address receiver,
-        uint256 amount,
-        address x0
-    );
-    bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
-    bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
+       _tellid = _tellid + 1;
 
-    address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address public _nftcontract;
-    uint256 public _nftid;
-    uint256 public _unlockdate;
+       TELLS memory save_ = TELLS({
 
-    constructor(address nftcontract_, uint256 nftid_) {
+         reserve: reserveprice_,
+         buyprice: buyprice_,
+         bids:  new uint256[](0),
+         endtime: block.timestamp + 7 days,
+         seller: msg.sender,
+         bidders: new address[](0),
+         nftcategory: nftcategory_,
+         nftcontroller: nftcontract_,
+         nftid: nftid_,
+         prints: prints_
 
-      _nftcontract = nftcontract_;
-      _nftid = nftid_;
-    }
+       });
 
-    receive () external payable {}
+       _tells.push(save_);
+       _tellid2tell[_tellid] = save_;
+       _teller2tells[msg.sender].push(_tellid);
+       _tell2index[_tellid] = _teller2tells[msg.sender].length - 1;
+       _nft2wallet[nftid_] = nftwallet_;
 
-    function holdnft(address nftcontract_, uint256 tokenid_, address nftincontract_, uint256 nftintokenid_, uint256 nftinquantity_) public {
+       if(nftcontract_ == _ens){
 
-          require(nftcontract_ == _nftcontract && tokenid_ == _nftid, 'this wallet is not for that nft');
+         _activeenstells.push(_tellid);
+         _activetell2index[_tellid] = _activeenstells.length - 1;
 
-      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+       }else{
 
-          IERC721 nft = IERC721(nftcontract_);
-          require(nft.ownerOf(tokenid_) == msg.sender, "you do not have this nft");
+         _activenfttells.push(_tellid);
+         _activetell2index[_tellid] = _activenfttells.length - 1;
 
-          require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
-          nft.safeTransferFrom(msg.sender, address(this), tokenid_);
+       }
 
-      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+     }
 
-          IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(msg.sender, tokenid_) >= nftinquantity_, "you have nnot enough");
-          nft.safeTransferFrom(msg.sender, address(this), tokenid_, nftinquantity_, bytes(""));
+     function canceltell(address tellid_) public {
 
-      } else {
+       require(_tellid2tell[tellid_].seller == msg.sender || _isadmin[msg.sender], 'not your tell');
+       require(_activetell2index[tellid_]>0 , 'tell is not active');
+       require(_tellid2tell[tellid_].bidders.length<1, 'tell has bids');
 
-          revert("invalid nft address");
-      }
+       address nftcontract_ = _tellid2tell[tellid_].nftcontroller;
+       uint256 nftid_ = _tellid2tell[tellid_].nftid;
 
-      if (IERC165(nftincontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+       if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
 
-          IERC721 nft = IERC721(nftincontract_);
-          require(nft.ownerOf(nftintokenid_) == msg.sender, "you do not have this nft");
+           IERC721 nft = IERC721(nftcontract_);
+           require(nft.ownerOf(nftid_) == address(this), "nft not in this contract");
 
-          require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
-          nft.safeTransferFrom(msg.sender, address(this), nftintokenid_);
+           nft.safeTransferFrom(address(this), _tellid2tell[tellid_].seller, nftid_);
+           require(checksuccess(), 'error transfering nft');
 
-      } else if (IERC165(nftincontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+       } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
 
-          IERC1155 nft = IERC1155(nftincontract_);
-          require(nft.balanceOf(msg.sender, nftintokenid_) >= nftinquantity_, "you have nnot enough");
-          nft.safeTransferFrom(msg.sender, address(this), nftintokenid_, nftinquantity_, bytes(""));
+           IERC1155 nft = IERC1155(nftcontract_);
+           require(nft.balanceOf(address(this), nftid_) >= _tellid2tell[tellid_].prints, "not enough prints in contract");
+           nft.safeTransferFrom(address(this), _tellid2tell[tellid_].seller , nftid_, _tellid2tell[tellid_].prints, bytes(""));
 
-      } else {
+       } else {
 
-          revert("invalid nft address");
-      }
+           revert("invalid nft address");
+       }
 
-    }
+       if(_activenfttells[_activetell2index[tellid_]]>0){
 
-    function transfernft(address nftcontract_, uint256 tokenid_, address nftoutcontract_, uint256 nftouttokenid_, uint256 nftoutquantity_) public {
+          delete _activenfttells[_activetell2index[tellid_]];
 
-      require(nftcontract_ == _nftcontract && tokenid_ == _nftid, 'this wallet is not for that nft');
+       }else{
 
+         delete _activeenstells[_activetell2index[tellid_]];
 
-      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+       }
 
-          IERC721 nft = IERC721(nftcontract_);
-          require(nft.ownerOf(tokenid_) == msg.sender, "you do not own this nft");
+        delete _teller2tells[_tellid2tell[tellid_].seller ][_tell2index[tellid_]];
 
-      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+     }
 
-          IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(msg.sender, tokenid_) > 0, "you do not own this nft");
+     function bid(uint256 tellid_, uint256 bidamount_) public {
 
-      } else {
+       require(_activetell2index[tellid_]>0 , 'tell is not active');
+       require(_tellid2tell[tellid_].seller == msg.sender, 'no bidding on your tell');
+       uint256 highestbidindex_ = _tellid2tell[tellid_].bids.length - 1;
+       uint256 highestbid_ = _tellid2tell[tellid_].bids[highestbidindex_];
 
-          revert("invalid nft address");
-      }
+       uint256 highestbidderindex_ = _tellid2tell[tellid_].bidders.length - 1;
+       address highestbidder_ = _tellid2tell[tellid_].bidders[highestbidderindex_];
+       address nftcontract_ = _tellid2tell[tellid_].nftcontroller;
+       uint256 nftid_ = _tellid2tell[tellid_].nftid;
 
-      if (IERC165(nftoutcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+       if(_tellid2tell[tellid_].bidders.length>0){
 
-          IERC721 nft = IERC721(nftoutcontract_);
-          require(nft.ownerOf(nftouttokenid_) == address(this), "nft not in this wallet");
-          nft.safeTransferFrom(address(this), msg.sender, nftouttokenid_);
+         require(bidamount_ > highestbid_, 'bid too low');
 
-      } else if (IERC165(nftoutcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+       }else{
 
-          IERC1155 nft = IERC1155(nftoutcontract_);
-          require(nft.balanceOf(address(this), nftouttokenid_) > nftoutquantity_, "not enough nfts in this wallet");
-            nft.safeTransferFrom(address(this), msg.sender, nftouttokenid_, nftoutquantity_, '');
+         require(bidamount_ > _tellid2tell[tellid_].reserve, 'bid too low');
 
-      } else {
+       }
 
-          revert("invalid nft address");
-      }
-    }
+       if(bidamount_ >= _tellid2tell[tellid_].buyprice){
+         ///transfer nft to buyer
 
-    function withdraweth(address nftcontract_, uint256 tokenid_) public returns(bool){
+         if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
 
-      require(nftcontract_ == _nftcontract && tokenid_ == _nftid, 'this wallet is not for that nft');
+             IERC721 nft = IERC721(nftcontract_);
+             require(nft.ownerOf(nftid_) == address(this), "nft not in this contract");
 
-      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+             nft.safeTransferFrom(address(this), msg.sender, nftid_);
+             require(checksuccess(), 'error transfering nft');
 
-          IERC721 nft = IERC721(nftcontract_);
-          require(nft.ownerOf(tokenid_) == msg.sender, "you do not own this nft");
+         } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
 
-      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+             IERC1155 nft = IERC1155(nftcontract_);
+             require(nft.balanceOf(address(this), nftid_) > 0, "not enough prints in contract");
+             nft.safeTransferFrom(address(this), msg.sender , nftid_, 1, bytes(""));
 
-          IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(msg.sender, tokenid_) > 0, "you do not own this nft");
+         } else {
 
-      } else {
+             revert("invalid nft address");
+         }
+       }
 
-          revert("invalid nft address");
-      }
-        (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
-        return success;
-    }
+       //refund previous bidder
+       if(highestbidder_!=address(0)){
 
-    function transfertoken(address nftcontract_, uint256 tokenid_, address token_, uint256 value_) public {
+         IERC20(WETH).transfer(highestbidder_, highestbid_);
+         require(checksuccess(), 'error refunding bid');
 
-      require(nftcontract_ == _nftcontract && tokenid_ == _nftid, 'this wallet is not for that nft');
+       }
+       //register bid
+       IERC20(WETH).safeTransferFrom(msg.sender,address(this),bidamount_);
+       require(checksuccess(), 'error paying bid');
 
-      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+       uint256 fee_ = bidamount_.mul(2).div(100);
+       bidamount_ = bidamount_.sub(fee_);
 
-          IERC721 nft = IERC721(nftcontract_);
-          require(nft.ownerOf(tokenid_) == msg.sender, "you do not own this nft");
+       _tellid2tell[tellid_].bids.push(bidamount_);
+       _tellid2tell[tellid_].bidders.push(msg.sender);
+       // pay 1% to nft and bank       //pay 1% to nft wallet if exists
+       if(_nft2wallet[nftid_]!=address(0)){
 
-      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+         IERC20(WETH).transfer(_nft2wallet[nftid_], fee_.div(2));
+         require(checksuccess(), 'error paying nft wallet');
+         IERC20(WETH).transfer(BANK, fee_.div(2));
+         require(checksuccess(), 'error paying bank');
+       }else{
+         IERC20(WETH).transfer(BANK, fee_);
+         require(checksuccess(), 'error paying bank');
+       }
+       //mint ferro to tribe
+       (address tribe_, address tribeleader_) = i369(TRIBE).GETTRIBE(msg.sender);
+       if(tribe_!=address(0)){
 
-          IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(msg.sender, tokenid_) > 0, "you do not own this nft");
+         i369(NFT).ISSUENEWMINT(tribe_, fee_.div(2).div(3), 1);
+         require(checksuccess(), 'error minting to tribe');
 
-      } else {
+         i369(NFT).ISSUENEWMINT(tribeleader_, fee_.div(2).div(3), 1);
+         require(checksuccess(), 'error minting to tribe leader');
 
-          revert("invalid nft address");
-      }
+         i369(NFT).ISSUENEWMINT(BANK, fee_.div(2).div(3), 1);
+         require(checksuccess(), 'error minting to tribe leader');
 
-      require(IERC20(token_).balanceOf(address(this))>= value_ , 'balance not equal to value');
-      IERC20(token_).safeTransfer(msg.sender,value_);
+       }else{
 
-    }
+         i369(NFT).ISSUENEWMINT(BANK, fee_.div(2), 1);
+         require(checksuccess(), 'error minting to tribe leader');
 
-    function lockwallet(address nftcontract_, uint256 tokenid_, uint256 untiltime_) public {
+       }
+     }
 
-      require(nftcontract_ == _nftcontract && tokenid_ == _nftid, 'this wallet is not for that nft');
+     function bidaccept(uint256 tellid_) public {
 
-      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
+       require(_activetell2index[tellid_]>0 , 'tell is not active');
+       uint256 highestbidderindex_ = _tellid2tell[tellid_].bidders.length - 1;
+       address highestbidder_ = _tellid2tell[tellid_].bidders[highestbidderindex_];
 
-          IERC721 nft = IERC721(nftcontract_);
-          require(nft.ownerOf(tokenid_) == msg.sender, "you do not own this nft");
+       uint256 highestbidindex_ = _tellid2tell[tellid_].bids.length - 1;
+       uint256 highestbid_ = _tellid2tell[tellid_].bids[highestbidindex_];
 
-      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
+       address nftcontract_ = _tellid2tell[tellid_].nftcontroller;
+       uint256 nftid_ = _tellid2tell[tellid_].nftid;
 
-          IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(msg.sender, tokenid_) > 0, "you do not own this nft");
+       if(block.timestamp < _tellid2tell[tellid_].endtime){
 
-      } else {
+         require(_tellid2tell[tellid_].seller == msg.sender, 'not your tell');
 
-          revert("invalid nft address");
-      }
+       }else{
 
-      _unlockdate = untiltime_;
+         require(highestbidder_ == msg.sender, 'not are not the highest bidder');
 
-    }
-}
+       }
 
-contract USERWALLET is ERC721Holder, ERC1155Holder {
+       if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
 
-    using SafeERC20 for IERC20;
-    using SafeMath for uint256;
-    event deposit(
-        address sender,
-        uint256 amount,
-        address x0
-    );
-    event withdraw(
+           IERC721 nft = IERC721(nftcontract_);
+           require(nft.ownerOf(nftid_) == address(this), "nft not in this contract");
 
-        address receiver,
-        uint256 amount,
-        address x0
-    );
-    bytes4 private constant INTERFACE_ID_ERC721 = 0x80ac58cd;
-    bytes4 private constant INTERFACE_ID_ERC1155 = 0xd9b67a26;
-    mapping(address => bool) public _backupaccess;
-    uint256 public _unlockdate;
-    bool private _backupaccessonly;
-    bool private _backupaccessadded;
-    address private _owner;
-    string public _name;
-    address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+           nft.safeTransferFrom(address(this), highestbidder_, nftid_);
+           require(checksuccess(), 'error transfering nft');
 
-    constructor(address owner_, string memory name_) {
-      _owner = owner_;
-      _name = name_;
-    }
+       } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
 
-    receive () external payable {}
+           IERC1155 nft = IERC1155(nftcontract_);
+           require(nft.balanceOf(address(this), nftid_) > 0, "not enough prints in contract");
+           nft.safeTransferFrom(address(this), highestbidder_ , nftid_, 1, bytes(""));
 
-    function addbackupaccess(address backup_) public {
+       } else {
 
-      if(_backupaccessadded){
+           revert("invalid nft address");
+       }
+       // pay seller
+       IERC20(WETH).safeTransfer(_tellid2tell[tellid_].seller,highestbid_);
+       require(checksuccess(), 'error paying bid');
 
-        require(_backupaccess[msg.sender], 'add from backup access');
+       // transfer nft to highestbidder_
 
-      }else{
+     }
 
-        require(msg.sender == _owner, 'you are not the owner of this wallet');
+     function checksuccess()
+         private pure
+         returns (bool)
+       {
+         uint256 returnValue = 0;
 
-      }
+         /* solium-disable-next-line security/no-inline-assembly */
+         assembly {
+           // check number of bytes returned from last function call
+           switch returndatasize()
 
-      _backupaccess[backup_] = true;
-      _backupaccessadded = true;
+             // no bytes returned: assume success
+             case 0x0 {
+               returnValue := 1
+             }
 
-    }
+             // 32 bytes returned: check if non-zero
+             case 0x20 {
+               // copy 32 bytes into scratch space
+               returndatacopy(0x0, 0x0, 0x20)
 
-    function turnonbackupaccess() public {
+               // load those bytes into returnValue
+               returnValue := mload(0x0)
+             }
 
-      require(_backupaccess[msg.sender] || msg.sender == _owner, 'you cannot do that');
-      _backupaccessonly = true;
+             // not sure what was returned: dont mark as success
+             default { }
 
-    }
+         }
 
-    function turnoffbackupaccess() public {
-
-      require(_backupaccess[msg.sender] , 'use back up access');
-      _backupaccessonly = false;
-
-    }
-
-    function holdnft(address nftcontract_, uint256 tokenid_, uint256 quantity_) public {
-
-        require(msg.sender == _owner, 'you are not the owner of this wallet');
-
-      if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC721)) {
-
-          IERC721 nft = IERC721(nftcontract_);
-          require(nft.ownerOf(tokenid_) == msg.sender, "you do not have this");
-          require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
-          nft.safeTransferFrom(msg.sender, address(this), tokenid_);
-
-      } else if (IERC165(nftcontract_).supportsInterface(INTERFACE_ID_ERC1155)) {
-
-          IERC1155 nft = IERC1155(nftcontract_);
-          require(nft.balanceOf(msg.sender, tokenid_) >= quantity_, "you have nnot enough");
-          nft.safeTransferFrom(msg.sender, address(this), tokenid_, quantity_, bytes(""));
-
-      } else {
-
-          revert("invalid nft address");
-      }
-
-    }
-
-    function transfernft(address nftAddress_, uint256 tokenid_, uint256 quantity_) public {
-
-        if(!_backupaccessonly){
-
-          require(msg.sender == _owner, 'you are not the owner of this wallet');
-
-        }else{
-
-          require(_backupaccess[msg.sender], 'you do not have access');
-
-        }
-        require(block.timestamp > _unlockdate, 'wallet is locked');
-
-      if (IERC165(nftAddress_).supportsInterface(INTERFACE_ID_ERC721)) {
-
-          IERC721 nft = IERC721(nftAddress_);
-          require(nft.ownerOf(tokenid_) == address(this), "not in wallet");
-          require(nft.isApprovedForAll(msg.sender, address(this)), "item not approved");
-
-      } else if (IERC165(nftAddress_).supportsInterface(INTERFACE_ID_ERC1155)) {
-
-          IERC1155 nft = IERC1155(nftAddress_);
-          require(nft.balanceOf(address(this), tokenid_) >= quantity_, "must hold enough in wallet");
-          nft.safeTransferFrom(address(this), msg.sender, tokenid_, quantity_, bytes(""));
-
-      } else {
-
-          revert("invalid nft address");
-      }
-    }
-
-    function withdraweth() public returns(bool){
-
-      if(!_backupaccessonly){
-
-        require(msg.sender == _owner, 'you are not the owner of this wallet');
-
-      }else{
-
-        require(_backupaccess[msg.sender], 'you do not have access');
-
-      }
-
-        require(block.timestamp > _unlockdate, 'wallet is locked');
-        (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
-        return success;
-
-
-    }
-
-    function transfertoken(address token_, uint256 value_) public {
-
-      if(!_backupaccessonly){
-
-        require(msg.sender == _owner, 'you are not the owner of this wallet');
-
-      }else{
-
-        require(_backupaccess[msg.sender], 'you do not have access');
-
-      }
-      require(block.timestamp > _unlockdate, 'wallet is locked');
-      require(msg.sender == _owner || _backupaccess[msg.sender], 'you are not the owner of this wallet');
-      require(IERC20(token_).balanceOf(address(this))>0 , 'no balance');
-      IERC20(token_).safeTransfer(msg.sender,value_);
-
-    }
-
-    function lockwallet(uint256 untiltime_) public {
-
-      if(!_backupaccessonly){
-
-        require(msg.sender == _owner, 'you are not the owner of this wallet');
-
-      }else{
-
-        require(_backupaccess[msg.sender], 'you do not have access');
-
-      }
-
-      _unlockdate = untiltime_;
-
-    }
-}
-
-contract FERRO_WALLETS  {
-
-    mapping(uint256=>mapping(address=>address)) public _nftid2nftcontract2wallet;
-    address[] public _nftwallets;
-    mapping(address => address) private _user2wallet;
-    mapping(address => address[]) public _user2wallets;
-
-   constructor() {}
-
-  function CREATEUSERWALLET(address user_, string memory name_) public returns(address) {
-
-    address wallet_ = address(new USERWALLET(user_, name_));
-    if(_user2wallet[user_]==address(0)){
-
-      _user2wallet[user_] = wallet_;
-
-    }
-    _user2wallets[user_].push(wallet_);
-
-    return wallet_;
-
-  }
-
-  function CREATENFTWALLET(address nftcontract_, uint256 nftid_) public returns(address) {
-
-    require(_nftid2nftcontract2wallet[nftid_][nftcontract_] == address(0), 'wallet already created');
-
-    address wallet_ = address(new NFTWALLET(nftcontract_, nftid_));
-    require(wallet_!=address(0), 'error creating wallet');
-
-    _nftid2nftcontract2wallet[nftid_][nftcontract_] = wallet_;
-    _nftwallets.push(wallet_);
-
-    return wallet_;
-
-  }
-
-  function GETNFTWALLET(address nftcontract_, uint256 nftid_) public view returns(address, address[] memory) {
-
-    return (_nftid2nftcontract2wallet[nftid_][nftcontract_], _nftwallets);
-
-  }
-
-  function GETUSERWALLET(address user_) public view returns(address, address[] memory) {
-
-    return (_user2wallet[user_], _user2wallets[user_]);
-
-  }
+         return returnValue != 0;
+       }
 }

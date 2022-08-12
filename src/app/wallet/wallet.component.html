@@ -1,22 +1,75 @@
 <div class="share-modal modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-body p-4 text-center">
-            <h4 class="mb-4" id="reportModalLabel">{{_messagetype}}</h4>
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="text-center" style="font-size:18px">{{_message}}</h4>
-                </div>
-              </div>
-              <div class="col-12 text-center">
-                <button class="btn btn-danger btn-sm rounded-pill mt-4" #messageclose type="button" data-bs-dismiss="modal" aria-label="Close"><i class="me-1 bi bi-x-lg"></i>Close</button>
-                <button class="btn btn-danger btn-sm rounded-pill mt-4" #message type="button" data-bs-toggle="modal" data-bs-target="#messageModal" style="display:none"><i class="me-1 bi bi-x-lg"></i></button>
-              </div>
-
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-4 text-center">
+        <h4 class="mb-4" id="reportModalLabel">{{_messagetype}}</h4>
+          <div class="card">
+            <div class="card-body">
+              <h4 class="text-center" style="font-size:18px">{{_message}}</h4>
+            </div>
           </div>
-        </div>
+          <div class="col-12 text-center">
+            <button class="btn btn-danger btn-sm rounded-pill mt-4" #messageclose type="button" data-bs-dismiss="modal" aria-label="Close"><i class="me-1 bi bi-x-lg"></i>Close</button>
+            <button class="btn btn-danger btn-sm rounded-pill mt-4" #message type="button" data-bs-toggle="modal" data-bs-target="#messageModal" style="display:none"><i class="me-1 bi bi-x-lg"></i></button>
+          </div>
+
       </div>
     </div>
+  </div>
+</div>
+
+<div class="share-modal modal fade" id="tellModal" tabindex="-1" aria-labelledby="tellModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-4 text-center">
+        <h4 class="mb-4" id="reportModalLabel">Launch Tell (Auction)</h4>
+          <div class="card">
+            <div class="card-body">
+              <form [formGroup]="_launchTell">
+                <div class="row g-4">
+                  <div class="col-12">
+                    <input class="form-control bg-gray border-0" type="number" name="prints" placeholder="how many?" formControlName="prints">
+                  </div>
+                  <div class="col-12">
+                    <input class="form-control bg-gray border-0" type="number" name="reserveprice" placeholder="reservice price" formControlName="reserveprice">
+                  </div>
+                  <div class="col-12">
+                    <input class="form-control bg-gray border-0" type="number" name="buyprice" placeholder="buy now price" formControlName="buyprice">
+                  </div>
+
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="col-12 text-center">
+            <button class="btn btn-danger btn-sm rounded-pill mt-4" #messageclose type="button" data-bs-dismiss="modal" aria-label="Close"><i class="me-1 bi bi-x-lg"></i>Close</button>
+            <button class="btn btn-danger btn-sm rounded-pill mt-4" #message type="button" data-bs-toggle="modal" data-bs-target="#messageModal" style="display:none"><i class="me-1 bi bi-x-lg"></i></button>
+          </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="share-modal modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-4 text-center">
+        <h4 class="mb-4" id="reportModalLabel">{{_messagetype}}</h4>
+          <div class="card">
+            <div class="card-body">
+              <h4 class="text-center" style="font-size:18px">{{_message}}</h4>
+            </div>
+          </div>
+          <div class="col-12 text-center">
+            <button class="btn btn-danger btn-sm rounded-pill mt-4" #messageclose type="button" data-bs-dismiss="modal" aria-label="Close"><i class="me-1 bi bi-x-lg"></i>Close</button>
+            <button class="btn btn-danger btn-sm rounded-pill mt-4" #message type="button" data-bs-toggle="modal" data-bs-target="#messageModal" style="display:none"><i class="me-1 bi bi-x-lg"></i></button>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="share-modal modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -70,7 +123,7 @@
         <div class="modal-content">
           <div class="modal-body p-4 text-center">
             <h4 class="mb-4" id="shareModalLabel">Share this author</h4>
-            <div class="d-flex align-items-center justify-content-center"><a class="mx-2" href="#"><img src="assets/img/core-img/icons8-facebook.svg" alt=""></a><a class="mx-2" href="#"><img src="assets/img/core-img/icons8-twitter.svg" alt=""></a><a class="mx-2" href="#"><img src="assets/img/core-img/icons8-instagram.svg" alt=""></a><a class="mx-2" href="#"><img src="assets/img/core-img/icons8-slack.svg" alt=""></a><a class="mx-2" href="#"><img src="assets/img/core-img/icons8-player.svg" alt=""></a></div>
+            <div class="d-flex align-items-center justify-content-center"><a class="mx-2" href="javascript: void(0)"><img src="assets/img/core-img/icons8-facebook.svg" alt=""></a><a class="mx-2" href="javascript: void(0)"><img src="assets/img/core-img/icons8-twitter.svg" alt=""></a><a class="mx-2" href="javascript: void(0)"><img src="assets/img/core-img/icons8-instagram.svg" alt=""></a><a class="mx-2" href="javascript: void(0)"><img src="assets/img/core-img/icons8-slack.svg" alt=""></a><a class="mx-2" href="javascript: void(0)"><img src="assets/img/core-img/icons8-player.svg" alt=""></a></div>
             <button class="btn btn-danger btn-sm rounded-pill mt-4" type="button" data-bs-dismiss="modal" aria-label="Close"><i class="me-1 bi bi-x-lg"></i>Close</button>
           </div>
         </div>
@@ -101,9 +154,9 @@
             <button class="dropdown-toggle" id="dd9887" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
             <!-- Dropdown Menu -->
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dd9887" style="">
-              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="me-1 bi bi-share"></i>Share</a></li>
-              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#copylinkModal"><i class="me-1 bi bi-box-arrow-up-right"></i>Copy Link</a></li>
-              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="me-1 bi bi-flag"></i>Report</a></li>
+              <li><a class="dropdown-item" href="javascript: void(0)" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="me-1 bi bi-share"></i>Share</a></li>
+              <li><a class="dropdown-item" href="javascript: void(0)" data-bs-toggle="modal" data-bs-target="#copylinkModal"><i class="me-1 bi bi-box-arrow-up-right"></i>Copy Link</a></li>
+              <li><a class="dropdown-item" href="javascript: void(0)" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="me-1 bi bi-flag"></i>Report</a></li>
             </ul>
           </div>
         </div>
@@ -134,7 +187,7 @@
                                         <h3 class="mb-3 text-white text-center">Your FERRO (iron) Wallet</h3>
                                         <p class="mb-4 text-white text-center">A secure smart contract wallet for storing your digital assets</p>
                                         <!-- <p class="mb-4 text-white text-center" *ngIf="_wallets && _wallets.length>0"><b>{{_wallets[0]}}</b></p> -->
-                                        <div class="button-groups text-center"><a class="btn btn-sm btn-warning rounded-pill me-3" href="#">Learn More</a><a class="btn btn-sm btn-dark rounded-pill" href="#">Lock Wallet</a></div>
+                                        <div class="button-groups text-center"><a class="btn btn-sm btn-warning rounded-pill me-3" href="javascript: void(0)">Learn More</a><a class="btn btn-sm btn-dark rounded-pill" href="javascript: void(0)">Lock Wallet</a></div>
                                       </div>
                                     </div>
                                   </div>
@@ -221,9 +274,9 @@
                                           <button class="btn dropdown-toggle rounded-pill shadow-sm" id="dd95687" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
                                           <!-- Dropdown Menu -->
                                           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dd95687">
-                                            <li><a class="dropdown-item" href="#"><i class="me-1 bi bi-share"></i>Share</a></li>
-                                            <li><a class="dropdown-item" href="#"><i class="me-1 bi bi-flag"></i>Report</a></li>
-                                            <li><a class="dropdown-item" href="#"><i class="me-1 bi bi-bookmark"></i>Bookmark</a></li>
+                                            <li><a class="dropdown-item" href="javascript: void(0)"><i class="me-1 bi bi-share"></i>Share</a></li>
+                                            <li><a class="dropdown-item" href="javascript: void(0)"><i class="me-1 bi bi-flag"></i>Report</a></li>
+                                            <li><a class="dropdown-item" href="javascript: void(0)"><i class="me-1 bi bi-bookmark"></i>Bookmark</a></li>
                                           </ul>
                                         </div>
                                       </div>
@@ -239,7 +292,7 @@
                                         <div class="col-8">
                                           <div class="name-info d-flex align-items-center">
                                             <div class="author-img position-relative"><img class="shadow" src="assets/img/bg-img/u1.jpeg" alt=""><i class="bi bi-check position-absolute bg-success"></i></div>
-                                            <div class="name-author"><a class="name d-block hover-primary fw-bold text-truncate" href="item-details.html" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Monkey Arts #114">{{data.ipfs.title}} #{{data.token_id}}</a><a class="author d-block fz-12 hover-primary text-truncate" href="javascript: void(0)">@{{data.ipfs.creator.slice(0,7)}}</a></div>
+                                            <div class="name-author"><a class="name d-block hover-primary fw-bold text-truncate" href="javascript: void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Monkey Arts #114">{{data.ipfs.title}} #{{data.token_id}}</a><a class="author d-block fz-12 hover-primary text-truncate" href="javascript: void(0)">@{{data.ipfs.creator.slice(0,7)}}</a></div>
                                           </div>
                                         </div>
                                         <div class="col-4">
@@ -250,8 +303,8 @@
                                       </div>
                                       <!-- Button -->
                                       <div class="row gx-2 align-items-center mt-3">
-                                        <div class="col-6"><a class="btn btn-primary btn-sm rounded-pill" href="#">Launch Tell</a></div>
-                                        <div class="col-6 text-end"><a class="btn btn-minimal btn-sm hover-primary" href="activity.html"> <i class="bi bi-activity me-1"></i>Activity</a></div>
+                                        <div class="col-6"><a class="btn btn-primary btn-sm rounded-pill" href="javascript: void(0)">Launch Tell</a></div>
+                                        <div class="col-6 text-end"><a class="btn btn-minimal btn-sm hover-primary" href="javascript: void(0)"> <i class="bi bi-activity me-1"></i>Activity</a></div>
                                       </div>
                                     </div>
                                   </div>

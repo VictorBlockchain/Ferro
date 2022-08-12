@@ -10,10 +10,13 @@ declare var $: any;
 const ABIBANK = require('../contracts/abi/bank.json');
 const ABIWALLETS = require('../contracts/abi/wallets.json');
 const ABINFT = require('../contracts/abi/nft.json');
+const ABITELL = require('../contracts/abi/tell.json');
 
 const WALLETS = environment.WALLETS;
 const BANK = environment.BANK;
 const NFT = environment.NFT;
+const TELL = environment.TELL;
+const WRAP = environment.WRAP;
 const CHAIN = environment.CHAIN;
 
 // import moment from 'moment';
@@ -112,25 +115,22 @@ public SETUSERWALLET(user_:any, username_:any, email_:any, story_:any, avatarcon
     })
 }
 
-public SETUSERNEWWALLET(user_:any, name_:any): Promise<any> {
+public SETBACKUPACCESS(user_:any, backupaddress_:any, wallet_:any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
 
         await this.SETWEB3();
         const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
-          name: "CREATEUSERWALLET",
+          name: "addbackupaccess",
           type: "function",
           inputs: [{
             type: 'address',
-            name: 'user_'
-          },{
-            type: 'string',
-            name: 'name_'
+            name: 'backup_'
           }]
-        }, [user_, name_.toString()])
+        }, [backupaddress_])
         const txt = await this.web3.eth.sendTransaction({
           from:user_,
-          to: WALLETS,
+          to: wallet_,
           gas: 3000000,
           data:encodedFunction
         }).on('transactionHash',(hash:any)=>{
@@ -149,6 +149,256 @@ public SETUSERNEWWALLET(user_:any, name_:any): Promise<any> {
       }
     })
 }
+
+public SETTURNONBACKUPACCESS(user_:any,  wallet_:any): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        await this.SETWEB3();
+        const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+          name: "turnonbackupaccess",
+          type: "function",
+          inputs: []
+        }, [user_, wallet_])
+        const txt = await this.web3.eth.sendTransaction({
+          from:user_,
+          to: wallet_,
+          gas: 3000000,
+          data:encodedFunction
+        }).on('transactionHash',(hash:any)=>{
+
+
+          }).on('receipt',(receipt:any)=>{
+
+            resolve({ success: true, msg: receipt });
+
+          }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+          //console.log(confirmationNumber, receipt)
+          }).on('error', console.error);
+
+      } catch (error) {
+
+      }
+    })
+}
+
+public SETTURNOFFBACKUPACCESS(user_:any,  wallet_:any): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        await this.SETWEB3();
+        const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+          name: "turnoffbackupaccess",
+          type: "function",
+          inputs: []
+        }, [user_, wallet_])
+        const txt = await this.web3.eth.sendTransaction({
+          from:user_,
+          to: wallet_,
+          gas: 3000000,
+          data:encodedFunction
+        }).on('transactionHash',(hash:any)=>{
+
+
+          }).on('receipt',(receipt:any)=>{
+
+            resolve({ success: true, msg: receipt });
+
+          }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+          //console.log(confirmationNumber, receipt)
+          }).on('error', console.error);
+
+      } catch (error) {
+
+      }
+    })
+}
+
+  public SETHOLDNFT(user_:any,  nftcontract_:any, tokenid_:any, quantity_:any, wallet_:any): Promise<any> {
+      return new Promise(async (resolve, reject) => {
+        try {
+
+          await this.SETWEB3();
+          const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+            name: "holdnft",
+            type: "function",
+            inputs: [{
+              type: 'address',
+              name: 'nftcontract_'
+            },{
+              type: 'uint256',
+              name: 'tokenid_'
+            },{
+              type: 'uint256',
+              name: 'quantity_'
+            }]
+          }, [user_, nftcontract_, tokenid_, quantity_])
+          const txt = await this.web3.eth.sendTransaction({
+            from:user_,
+            to: wallet_,
+            gas: 3000000,
+            data:encodedFunction
+          }).on('transactionHash',(hash:any)=>{
+
+
+            }).on('receipt',(receipt:any)=>{
+
+              resolve({ success: true, msg: receipt });
+
+            }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+            //console.log(confirmationNumber, receipt)
+            }).on('error', console.error);
+
+        } catch (error) {
+
+        }
+      })
+  }
+
+  public SETTRANSFERNFT(user_:any,  nftcontract_:any, tokenid_:any, quantity_:any, wallet_:any): Promise<any> {
+      return new Promise(async (resolve, reject) => {
+        try {
+
+          await this.SETWEB3();
+          const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+            name: "transfernft",
+            type: "function",
+            inputs: [{
+              type: 'address',
+              name: 'nftcontract_'
+            },{
+              type: 'uint256',
+              name: 'tokenid_'
+            },{
+              type: 'uint256',
+              name: 'quantity_'
+            }]
+          }, [user_, nftcontract_, tokenid_, quantity_])
+          const txt = await this.web3.eth.sendTransaction({
+            from:user_,
+            to: wallet_,
+            gas: 3000000,
+            data:encodedFunction
+          }).on('transactionHash',(hash:any)=>{
+
+
+            }).on('receipt',(receipt:any)=>{
+
+              resolve({ success: true, msg: receipt });
+
+            }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+            //console.log(confirmationNumber, receipt)
+            }).on('error', console.error);
+
+        } catch (error) {
+
+        }
+      })
+  }
+
+  public SETWITHDRAWETH(user_:any, wallet_:any): Promise<any> {
+      return new Promise(async (resolve, reject) => {
+        try {
+
+          await this.SETWEB3();
+          const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+            name: "withdraweth",
+            type: "function",
+            inputs: []
+          }, [user_, wallet_])
+          const txt = await this.web3.eth.sendTransaction({
+            from:user_,
+            to: wallet_,
+            gas: 3000000,
+            data:encodedFunction
+          }).on('transactionHash',(hash:any)=>{
+
+
+            }).on('receipt',(receipt:any)=>{
+
+              resolve({ success: true, msg: receipt });
+
+            }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+            //console.log(confirmationNumber, receipt)
+            }).on('error', console.error);
+
+        } catch (error) {
+
+        }
+      })
+  }
+  public SETTRANSERTOKEN(user_:any, wallet_:any, token_:any, value_:any): Promise<any> {
+      return new Promise(async (resolve, reject) => {
+        try {
+
+          await this.SETWEB3();
+          const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+            name: "transfertoken",
+            type: "function",
+            inputs: [{
+              type: 'address',
+              name: 'token_'
+            },{
+              type: 'uint256',
+              name: 'value_'
+            }]
+          }, [user_, token_, value_])
+          const txt = await this.web3.eth.sendTransaction({
+            from:user_,
+            to: wallet_,
+            gas: 3000000,
+            data:encodedFunction
+          }).on('transactionHash',(hash:any)=>{
+
+
+            }).on('receipt',(receipt:any)=>{
+
+              resolve({ success: true, msg: receipt });
+
+            }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+            //console.log(confirmationNumber, receipt)
+            }).on('error', console.error);
+
+        } catch (error) {
+
+        }
+      })
+  }
+
+  public SETLOCKWALLET(user_:any, untiltime_:any, wallet_:any): Promise<any> {
+      return new Promise(async (resolve, reject) => {
+        try {
+
+          await this.SETWEB3();
+          const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+            name: "transfertoken",
+            type: "function",
+            inputs: [{
+              type: 'uint256',
+              name: 'untiltime_'
+            }]
+          }, [user_, untiltime_])
+          const txt = await this.web3.eth.sendTransaction({
+            from:user_,
+            to: wallet_,
+            gas: 3000000,
+            data:encodedFunction
+          }).on('transactionHash',(hash:any)=>{
+
+
+            }).on('receipt',(receipt:any)=>{
+
+              resolve({ success: true, msg: receipt });
+
+            }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+            //console.log(confirmationNumber, receipt)
+            }).on('error', console.error);
+
+        } catch (error) {
+
+        }
+      })
+  }
 
 public SETCOLLECTION(user_:any, image_:any, title_:any, desc_:any, category_:any, media_:any): Promise<any> {
     return new Promise(async (resolve, reject) => {
@@ -300,6 +550,488 @@ public SETMINT(user_:any, uri_:any, ipfs_:any, collectionid_:any, royalty_:any, 
     })
 }
 
+public APPROVE721(user_:any, nftcontract_:any, nftid_:any): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        await this.SETWEB3();
+        const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+          name: "setApprovalForAll",
+          type: "function",
+          inputs: [{
+            type: 'address',
+            name: 'operator'
+          },{
+            type:'bool',
+            name:'approved'
+
+          }]
+        }, [user_, true])
+        const txt = await this.web3.eth.sendTransaction({
+          from:user_,
+          to: TELL,
+          gas: 3000000,
+          data:encodedFunction
+        }).on('transactionHash',(hash:any)=>{
+
+
+          }).on('receipt',(receipt:any)=>{
+
+            resolve({ success: true, msg: receipt });
+
+          }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+          //console.log(confirmationNumber, receipt)
+          }).on('error', console.error);
+
+      } catch (error) {
+
+      }
+    })
+  }
+
+  public APPROVE1155(user_:any, nftcontract_:any, nftid_:any): Promise<any> {
+      return new Promise(async (resolve, reject) => {
+        try {
+
+          await this.SETWEB3();
+          const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+            name: "setApprovalForAll",
+            type: "function",
+            inputs: [{
+              type: 'address',
+              name: 'operator'
+            },{
+              type:'bool',
+              name:'approved'
+
+            }]
+          }, [user_, true])
+          const txt = await this.web3.eth.sendTransaction({
+            from:user_,
+            to: TELL,
+            gas: 3000000,
+            data:encodedFunction
+          }).on('transactionHash',(hash:any)=>{
+
+
+            }).on('receipt',(receipt:any)=>{
+
+              resolve({ success: true, msg: receipt });
+
+            }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+            //console.log(confirmationNumber, receipt)
+            }).on('error', console.error);
+        } catch (error) {
+
+        }
+      })
+    }
+
+    public SETTELL(user_:any, nftcontract_:any, nftid_:any, nftcategory_:any, prints_:any, reserveprice_:any, buyprice_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "setnftmint",
+              type: "function",
+              inputs: [{
+                type: 'address',
+                name: 'nftcontract_'
+              },{
+                type: 'uint256',
+                name: 'nftid_'
+              },{
+                type: 'uint256',
+                name: 'nftcategory_'
+              },{
+                type: 'uint256',
+                name: 'prints_'
+              },{
+                type: 'uint256',
+                name: 'reserveprice_'
+              },{
+                type: 'uint256',
+                name: 'buyprice_'
+              }]
+
+            }, [nftcontract_, nftid_, nftcategory_, prints_,reserveprice_,buyprice_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: TELL,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+    public SETCANCELTELL(user_:any, tellid_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "setnftmint",
+              type: "function",
+              inputs: [{
+                type: 'address',
+                name: 'tellid_'
+              }]
+
+            }, [tellid_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: TELL,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+    public SETBID(user_:any, tellid_:any, bidamount_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "bid",
+              type: "function",
+              inputs: [{
+                type: 'uint256',
+                name: 'tellid_'
+              },{
+                type: 'uint256',
+                name: 'bidamount_'
+              }]
+
+            }, [tellid_, bidamount_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: TELL,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+    public SETACCEPTBID(user_:any, tellid_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "bid",
+              type: "function",
+              inputs: [{
+                type: 'uint256',
+                name: 'tellid_'
+              }]
+
+            }, [tellid_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: TELL,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+    public SETWRAPNFT(user_:any, nftcontract_:any, nftid_:any, ipfs_:any, data_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "wrap",
+              type: "function",
+              inputs: [{
+                type: 'address',
+                name: 'nftcontract_'
+              },{
+                type: 'uint256',
+                name: 'nftid_'
+              },{
+                type: 'string',
+                name: 'ipfs_'
+              },{
+                type: 'bytes',
+                name: 'data_'
+              }]
+
+            }, [nftcontract_, nftid_,ipfs_,data_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: WRAP,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+    public SETREDEEMCOUPON(user_:any, wnft_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "redeemCoupon",
+              type: "function",
+              inputs: [{
+                type: 'uint256',
+                name: 'wnft_'
+              }]
+
+            }, [wnft_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: WRAP,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+    public SETJOINTRIBE(user_:any, tribeid_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "createtribe",
+              type: "function",
+              inputs: [{
+                type: 'uint256',
+                name: 'tribeid_'
+              }]
+
+            }, [tribeid_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: TELL,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+    public SETLEAVETRIBE(user_:any, tribeid_:any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // console.log(uri_);
+
+            await this.SETWEB3();
+            const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+              name: "createtribe",
+              type: "function",
+              inputs: [{
+                type: 'uint256',
+                name: 'tribeid_'
+              }]
+
+            }, [tribeid_])
+            const txt = await this.web3.eth.sendTransaction({
+              from:user_,
+              to: TELL,
+              gas: 6000000,
+              data:encodedFunction
+            }).on('transactionHash',(hash:any)=>{
+
+
+              }).on('receipt',(receipt:any)=>{
+
+                resolve({ success: true, msg: receipt });
+
+              }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+              //console.log(confirmationNumber, receipt)
+              }).on('error', console.error);
+
+          } catch (error) {
+
+          }
+        })
+    }
+
+      public SETTAKETOKEN(user_:any, tokenaddress_:any, tribeid_:any): Promise<any> {
+          return new Promise(async (resolve, reject) => {
+            try {
+              // console.log(uri_);
+
+              await this.SETWEB3();
+              const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+                name: "taketoken",
+                type: "function",
+                inputs: [{
+                  type: 'address',
+                  name: 'tokenaddress_'
+                },{
+                  type: 'uint256',
+                  name: 'tribeid_'
+                }]
+
+              }, [tokenaddress_,tribeid_])
+              const txt = await this.web3.eth.sendTransaction({
+                from:user_,
+                to: TELL,
+                gas: 6000000,
+                data:encodedFunction
+              }).on('transactionHash',(hash:any)=>{
+
+
+                }).on('receipt',(receipt:any)=>{
+
+                  resolve({ success: true, msg: receipt });
+
+                }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+                //console.log(confirmationNumber, receipt)
+                }).on('error', console.error);
+
+            } catch (error) {
+
+            }
+          })
+      }
+
+      public SETTAKENFT(user_:any, tokenaddress_:any, nftid_:any, tribeid_:any): Promise<any> {
+          return new Promise(async (resolve, reject) => {
+            try {
+              // console.log(uri_);
+
+              await this.SETWEB3();
+              const encodedFunction = this.web3.eth.abi.encodeFunctionCall({
+                name: "taketoken",
+                type: "function",
+                inputs: [{
+                  type: 'address',
+                  name: 'tokenaddress_'
+                },{
+                  type: 'uint256',
+                  name: 'nftid_'
+                },{
+                  type: 'uint256',
+                  name: 'tribeid_'
+                }]
+
+              }, [tokenaddress_,nftid_,tribeid_])
+              const txt = await this.web3.eth.sendTransaction({
+                from:user_,
+                to: TELL,
+                gas: 6000000,
+                data:encodedFunction
+              }).on('transactionHash',(hash:any)=>{
+
+
+                }).on('receipt',(receipt:any)=>{
+
+                  resolve({ success: true, msg: receipt });
+
+                }).on('confirmation',(confirmationNumber:any, receipt:any)=>{
+                //console.log(confirmationNumber, receipt)
+                }).on('error', console.error);
+
+            } catch (error) {
+
+            }
+          })
+      }
   private pop(type: any, message: any) {
     let title;
     if (type == 'error') {

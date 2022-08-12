@@ -1112,6 +1112,7 @@ function setnftmint(bytes memory data_, string memory ipfs_, uint256 collection_
         payto: payto_,
         ipfs: ipfs_,
         wallet:wallet_
+
       });
 
       _nft[NFTID] = save_;

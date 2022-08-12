@@ -4,6 +4,7 @@ import {  Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { SERVICE } from '../service/web3.service';
 import { environment } from '../../environments/environment';
+const ABITELL = require('../contracts/abi/tell.json');
 declare var Moralis:any;
 declare var axios:any;
 declare var $: any;
@@ -18,6 +19,7 @@ Moralis.start({ serverUrl, appId });
 })
 export class WalletComponent implements OnInit,AfterViewInit {
 
+  _launchTell: FormGroup;
   _editProfile: FormGroup;
   _service:any;
   _user:any;
@@ -99,7 +101,7 @@ export class WalletComponent implements OnInit,AfterViewInit {
       // let response = await axios.get(url);
       // console.log(response.data);
     }
-    console.log(this._usernfts);
+    // console.log(this._usernfts);
   }
   async editprofile(){
 
@@ -130,31 +132,110 @@ export class WalletComponent implements OnInit,AfterViewInit {
     }
   }
 
+  async createtell(nftcontract_:any, nftid_:any, type_:any, nftcategory_:any){
+
+    if(type_==1){
+
+      //721 approval
+        const options = {
+        chain: environment.CHAIN,
+        address: environment.TELL,
+        function_name: "getApproved",
+        abi: ABITELL,
+        params: { tokenId: nftid_ },
+      };
+      const result = await Moralis.Web3API.native.runContractFunction(options);
+      if(result!=environment.TELL){
+        ///approve 721
+        this._service.APPROVE721(this._user, environment.TELL)
+        .then((res:any)=>{
+          if(res.success){
+            ///approval is set.. create tell
+            this.createtellcomplete(nftcontract_, nftid_, nftcategory_);
+
+          }
+        })
+      }else{
+        ///this is approved
+        this.createtellcomplete(nftcontract_, nftid_, nftcategory_);
+      }
+
+    }else{
+
+      ///this is a 1155 nft
+      const options = {
+      chain: environment.CHAIN,
+      address: environment.TELL,
+      function_name: "isApprovedForAll",
+      abi: ABITELL,
+      params: { account: this._user,operator:environment.TELL },
+    };
+    const result = await Moralis.Web3API.native.runContractFunction(options);
+      if(result){
+
+        ///approval is set.. create tell
+        this.createtellcomplete(nftcontract_, nftid_, nftcategory_);
+
+      }else{
+        ///set approval
+        this._service.APPROVE1155(this._user, environment.TELL)
+        .then((res:any)=>{
+          if(res.success){
+            ///approval is set.. create tell
+            this.createtellcomplete(nftcontract_, nftid_, nftcategory_);
+
+          }
+        })
+      }
+    }
+  }
+
+  async createtellcomplete(nftcontract_:any, nftid_:any, nftcategory_:any){
+
+    let pass = true;
+    if(this._launchTell.controls.prints.value){
+
+      this.pop('error', 'how many prints?');
+      pass = false;
+    }
+    if(this._launchTell.controls.reserveprice.value && pass){
+
+      this.pop('error', 'whats the reserve price?');
+      pass = false;
+    }
+    if(this._launchTell.controls.buyprice.value && pass){
+
+      this.pop('error', 'whats the buy now price?');
+      pass = false;
+    }
+
+    if(pass){
+
+      this._service.createtell(this._user, nftcontract_, nftid_, nftcategory_,this._launchTell.controls.prints.value, this._launchTell.controls.reserveprice_.value, this._launchTell.controls.buyprice.value )
+      .then((res:any)=>{
+
+      })
+    }
+
+  }
+
   ngAfterViewInit() {
-    // $('.h-banner-slider').slick({
-    //   dots: false,
-    //   slidesToShow: 1,
-    //   infinite: true,
-    //   centerMode: true,
-    //   centerPadding: '50px',
-    //   arrows: false,
-    //   slidesToScroll: 1,
-    //   responsive: [
-    //     {
-    //       breakpoint: 475,
-    //       settings: {
-    //         centerPadding: '20px',
-    //       },
-    //     },
-    //
-    //     {
-    //       breakpoint: 375,
-    //       settings: {
-    //         centerPadding: '15px',
-    //       },
-    //     },
-    //   ],
-    // });
+
+  }
+
+  private pop(type: any, message: any) {
+    let title;
+    if (type == 'error') {
+      title = 'Error!';
+    } else {
+      title = 'Success!';
+    }
+    this._message = message;
+    this._messagetype = title;
+    setTimeout(() => {
+      this._message = '';
+    }, 3000);
+
   }
 
   createForm(){
@@ -165,6 +246,14 @@ export class WalletComponent implements OnInit,AfterViewInit {
     avatarid: [''],
     email: [''],
     story: [''],
+
+  });
+
+  this._launchTell = this.formBuilder.group({
+
+    reserveprice: [''],
+    buyprice: [''],
+    prints: [''],
 
   });
 
